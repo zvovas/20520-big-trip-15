@@ -5,11 +5,15 @@ import {createSiteMenuTemplate} from './view/site-menu.js';
 import {createEventFilterTemplate} from './view/event-filters.js';
 import {createEventSortTemplate} from './view/event-sort.js';
 import {createEventListTemplate} from './view/event-list.js';
-import {createCreateFormTemplate} from './view/create-form.js';
 import {createEditFormTemplate} from './view/edit-form.js';
 import {createEventTemplate} from './view/event.js';
+import {compareTimeStart} from './utils.js';
 
-const TRIP_EVENT_COUNT = 3;
+import {generatePoint} from './mock/point.js';
+
+const TRIP_EVENT_COUNT = 15;
+
+const points = Array(TRIP_EVENT_COUNT).fill().map(generatePoint).sort(compareTimeStart);
 
 const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
@@ -36,8 +40,8 @@ render(tripEventsElement, createEventSortTemplate(), 'beforeend');
 
 render(tripEventsElement, createEventListTemplate(), 'beforeend');
 const tripEventListElement = tripEventsElement.querySelector('.trip-events__list');
-render(tripEventListElement, createCreateFormTemplate(), 'beforeend');
 render(tripEventListElement, createEditFormTemplate(), 'beforeend');
-for (let i = 0; i < TRIP_EVENT_COUNT; i++) {
-  render(tripEventListElement, createEventTemplate(), 'beforeend');
+render(tripEventListElement, createEditFormTemplate(points[1], true), 'beforeend');
+for (let i = 2; i < TRIP_EVENT_COUNT; i++) {
+  render(tripEventListElement, createEventTemplate(points[i]), 'beforeend');
 }
