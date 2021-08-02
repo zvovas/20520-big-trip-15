@@ -1,4 +1,4 @@
-import {convertDateToISO, humanizeDate, humanizeTime, calculateTimeDifference} from '../utils.js';
+import {convertDateToISO, humanizeDateMonthDay, humanizeTime, calculateTimeDifference} from '../utils.js';
 
 const createSelectedOffersTemplate = (offers) => {
   let result = '<h4 class="visually-hidden">Offers:</h4> <ul class="event__selected-offers">';
@@ -28,7 +28,7 @@ export const createEventTemplate = (point) => {
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="${convertDateToISO(timeStart, false)}">${humanizeDate(timeStart)}</time>
+      <time class="event__date" datetime="${convertDateToISO(timeStart, false)}">${humanizeDateMonthDay(timeStart)}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>

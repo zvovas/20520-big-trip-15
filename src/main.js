@@ -23,8 +23,8 @@ const pageHeaderElement = document.querySelector('.page-body');
 const tripMainElement = pageHeaderElement.querySelector('.trip-main');
 render(tripMainElement, createTripInfoTemplate(), 'afterbegin');
 const tripInfoElement = tripMainElement.querySelector('.trip-info');
-render(tripInfoElement, createRouteAndDatesTemplate(), 'beforeend');
-render(tripInfoElement, createTotalPriceTemplate(), 'beforeend');
+render(tripInfoElement, createRouteAndDatesTemplate(points), 'beforeend');
+render(tripInfoElement, createTotalPriceTemplate(points), 'beforeend');
 
 
 const siteMenuElement = tripMainElement.querySelector('.trip-controls__navigation');
@@ -41,7 +41,7 @@ render(tripEventsElement, createEventSortTemplate(), 'beforeend');
 render(tripEventsElement, createEventListTemplate(), 'beforeend');
 const tripEventListElement = tripEventsElement.querySelector('.trip-events__list');
 render(tripEventListElement, createEditFormTemplate(), 'beforeend');
-render(tripEventListElement, createEditFormTemplate(points[1], true), 'beforeend');
-for (let i = 2; i < TRIP_EVENT_COUNT; i++) {
+render(tripEventListElement, createEditFormTemplate(points[0], true), 'beforeend');
+for (let i = 1; i < points.length; i++) {
   render(tripEventListElement, createEventTemplate(points[i]), 'beforeend');
 }

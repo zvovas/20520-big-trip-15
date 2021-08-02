@@ -29,7 +29,8 @@ export const convertDateToISO = (date, isWithTime = true) => {
   return dayjs(date).format('YYYY-MM-DD');
 };
 export const humanizeDateTime = (date) => dayjs(date).format('DD/MM/YY HH:mm');
-export const humanizeDate = (date) => dayjs(date).format('MMM D').toUpperCase();
+export const humanizeDateMonthDay = (date) => dayjs(date).format('MMM D').toUpperCase();
+export const humanizeDateDayMonth = (date) => dayjs(date).format('D MMM').toUpperCase();
 export const humanizeTime = (date) => dayjs(date).format('HH:mm');
 export const calculateTimeDifference = (dateA, dateB) => {
   const difference = dateA - dateB;
