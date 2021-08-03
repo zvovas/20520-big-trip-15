@@ -3,6 +3,7 @@ import {humanizeDateTime} from '../utils.js';
 import {createOffersTemplate} from './edit-offers.js';
 import {createDestinationInfoTemplate} from './destination-info.js';
 import {allDestinations} from '../mock/destinations.js';
+import {allOffers} from '../mock/offers.js';
 
 const createEventTypeInputTemplate = (type) => (
   `<div class="event__type-item">
@@ -23,11 +24,13 @@ export const createEditFormTemplate = (point = {}, isEdit = false) => {
     price = '',
   } = point;
 
-
-  const information = (destination) ? allDestinations.find((item) => item.name === destination) : null;
   const pointTypeFieldset = POINT_TYPES.map((pointType) => createEventTypeInputTemplate(pointType)).join('');
   const destinationDatalist = DESTINATIONS.map((pointDestination) => createDestinationOptionTemplate(pointDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
+  const typeOffers = allOffers.find((item) => item.type === type).offers;
+  const offersTemplate = (typeOffers && typeOffers.length > 0) ? createOffersTemplate(typeOffers, offers) : '';
+  const information = (destination) ? allDestinations.find((item) => item.name === destination) : null;
+  const informationTemplate = (information) ? createDestinationInfoTemplate(information) : '';
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -78,9 +81,9 @@ export const createEditFormTemplate = (point = {}, isEdit = false) => {
         ${editButton}
       </header>
       <section class="event__details">
-        ${createOffersTemplate(type, offers)}
+        ${offersTemplate}
 
-        ${createDestinationInfoTemplate(information)}
+        ${informationTemplate}
       </section>
     </form>
   </li>`;

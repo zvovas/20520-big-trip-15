@@ -8,21 +8,13 @@ const createPhotosTemplate = (photos) => (
   </div>`
 );
 
-export const createDestinationInfoTemplate = (information) => {
-  if (!information) {
-    return '';
-  }
-
-  const {description, pictures} = information;
-
-  if (!description && (!pictures || !pictures.length)) {
-    return '';
-  }
-
-  return `<section class="event__section  event__section--destination">
+export const createDestinationInfoTemplate = ({description, pictures}) => (
+  (!description && (!pictures || !pictures.length))
+    ? ''
+    : `<section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
             ${(description) ? createParagraphTemplate(description) : ''}
 
             ${(pictures.length) ? createPhotosTemplate(pictures) : ''}
-          </section>`;
-};
+          </section>`
+);

@@ -1,21 +1,20 @@
 import {convertDateToISO, humanizeDateMonthDay, humanizeTime, calculateTimeDifference} from '../utils.js';
 
-const createSelectedOffersTemplate = (offers) => {
-  let result = '<h4 class="visually-hidden">Offers:</h4> <ul class="event__selected-offers">';
 
-  for (const offer of offers) {
-    result += `
-    <li class="event__offer">
-      <span class="event__offer-title">${offer.title}</span>
-      &plus;&euro;&nbsp;
-      <span class="event__offer-price">${offer.price}</span>
-    </li>`;
-  }
+const createSelectedOfferTemplate = (offer) => (
+  `<li class="event__offer">
+    <span class="event__offer-title">${offer.title}</span>
+    &plus;&euro;&nbsp;
+    <span class="event__offer-price">${offer.price}</span>
+  </li>`
+);
 
-  result += '</ul>';
-
-  return result;
-};
+const createSelectedOffersTemplate = (offers) => (
+  `<h4 class="visually-hidden">Offers:</h4>
+  <ul class="event__selected-offers">
+    ${offers.map(createSelectedOfferTemplate).join('')}
+  </ul>`
+);
 
 export const createEventTemplate = (point) => {
   const {type, destination, offers, timeStart, timeEnd, price, isFavorite} = point;
