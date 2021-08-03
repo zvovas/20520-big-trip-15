@@ -21,6 +21,8 @@ export function getRandomArrayElements (array, count) {
   return currentArray;
 }
 
+const getLeadingZero = (number) => (number < 10) ? `0${number}` : `${number}`;
+
 export const convertDateToISO = (date, isWithTime = true) => {
   if (isWithTime) {
     return dayjs(date).format('YYYY-MM-DD[T]HH:mm[:00]');
@@ -39,11 +41,11 @@ export const calculateTimeDifference = (dateA, dateB) => {
   const countOfMinutes = dayjs.duration(difference, 'millisecond').minutes() % 60;
 
   if (countOfDay > 0) {
-    return `${countOfDay}D ${countOfHour}H ${countOfMinutes}M`;
+    return `${getLeadingZero(countOfDay)}D ${getLeadingZero(countOfHour)}H ${getLeadingZero(countOfMinutes)}M`;
   } else if (countOfHour > 0) {
-    return `${countOfHour}H ${countOfMinutes}M`;
+    return `${getLeadingZero(countOfHour)}H ${getLeadingZero(countOfMinutes)}M`;
   } else {
-    return `${countOfMinutes}M`;
+    return `${getLeadingZero(countOfMinutes)}M`;
   }
 };
 
