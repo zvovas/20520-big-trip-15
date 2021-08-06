@@ -1,5 +1,5 @@
 import {DESTINATIONS, POINT_TYPES} from '../const.js';
-import {humanizeDateTime} from '../utils.js';
+import {createElement, humanizeDateTime} from '../utils.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
 
@@ -69,7 +69,7 @@ const createDestinationInfoTemplate = ({description, pictures}) => (
           </section>`
 );
 
-export const createEditFormTemplate = (point = {}, isEdit = false) => {
+const createEditFormTemplate = (point = {}, isEdit = false) => {
   const {
     type = POINT_TYPES[0],
     destination = '',
@@ -143,3 +143,27 @@ export const createEditFormTemplate = (point = {}, isEdit = false) => {
     </form>
   </li>`;
 };
+
+export default class EditForm {
+  constructor(point, isEdit) {
+    this._point = point;
+    this._isEdit = isEdit;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEditFormTemplate(this._point, this._isEdit);
+  }
+
+  getElement () {
+    if(!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement () {
+    this._element = null;
+  }
+}

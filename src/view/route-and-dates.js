@@ -1,4 +1,4 @@
-import {humanizeDateDayMonth, humanizeDateMonthDay} from '../utils.js';
+import {createElement, humanizeDateDayMonth, humanizeDateMonthDay} from '../utils.js';
 
 const MAX_CITIES_IN_ROUTE = 3;
 
@@ -15,7 +15,7 @@ const createDatesTemplate =  (points) => {
     : `${humanizeDateDayMonth(dateStart)}&nbsp;&mdash;&nbsp;${humanizeDateDayMonth(dateEnd)}`;
 };
 
-export const createRouteAndDatesTemplate = (points) => {
+const createRouteAndDatesTemplate = (points) => {
   const destinations = points.map((point) => point.destination);
   return `<div class="trip-info__main">
     <h1 class="trip-info__title">${createRouteTemplate(destinations)}</h1>
@@ -23,3 +23,26 @@ export const createRouteAndDatesTemplate = (points) => {
     <p class="trip-info__dates">${createDatesTemplate(points)}</p>
   </div>`;
 };
+
+export default class RouteAndDates {
+  constructor(points) {
+    this._points = points;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createRouteAndDatesTemplate(this._points);
+  }
+
+  getElement () {
+    if(!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement () {
+    this._element = null;
+  }
+}
