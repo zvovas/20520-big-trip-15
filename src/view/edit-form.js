@@ -1,7 +1,5 @@
 import {DESTINATIONS, POINT_TYPES} from '../const.js';
 import {humanizeDateTime} from '../utils.js';
-import {createOffersTemplate} from './edit-offers.js';
-import {createDestinationInfoTemplate} from './destination-info.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
 
@@ -13,6 +11,63 @@ const createEventTypeInputTemplate = (type) => (
 );
 
 const createDestinationOptionTemplate = (destination) => `<option value="${destination}"></option>`;
+
+const createOfferTemplate = ({title, price, isChecked = false}) => {
+  const checkedStatus = (isChecked) ? 'checked' : '';
+  return `<div class="event__offer-selector">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title.split(' ').join('-')}-1" type="checkbox" name="event-offer-${title.split(' ').join('-')}" ${checkedStatus}>
+    <label class="event__offer-label" for="event-offer-${title.split(' ').join('-')}-1">
+      <span class="event__offer-title">${title}</span>
+      &plus;&euro;&nbsp;
+      <span class="event__offer-price">${price}</span>
+    </label>
+  </div>`;
+};
+
+const findCheckedOffers = (typeOffers, pointOffers) => {
+  typeOffers.forEach((typeOffer) => typeOffer.isChecked = !!pointOffers.some((pointOffer) => pointOffer.title === typeOffer.title));
+  return typeOffers;
+};
+
+const createAllOffersTemplate = (typeOffers, pointOffers) => (
+  (pointOffers && pointOffers.length > 0)
+    ? findCheckedOffers(typeOffers, pointOffers).map(createOfferTemplate).join('')
+    : typeOffers.map(createOfferTemplate).join('')
+);
+
+const createOffersTemplate = (typeOffers, offers) => {
+
+  const offersTemplate = createAllOffersTemplate(typeOffers, offers);
+
+  return `<section class="event__section  event__section--offers">
+            <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+            <div class="event__available-offers">
+              ${offersTemplate}
+            </div>
+          </section>`;
+};
+
+const createParagraphTemplate = (description) => `<p class="event__destination-description">${description}</p>`;
+const createPhotoTemplate = ({src, description}) => `<img class="event__photo" src="${src}" alt="${description}">`;
+const createPhotosTemplate = (photos) => (
+  `<div class="event__photos-container">
+    <div class="event__photos-tape">
+      ${photos.map(createPhotoTemplate).join('')}
+    </div>
+  </div>`
+);
+
+const createDestinationInfoTemplate = ({description, pictures}) => (
+  (!description && (!pictures || !pictures.length))
+    ? ''
+    : `<section class="event__section  event__section--destination">
+            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+            ${(description) ? createParagraphTemplate(description) : ''}
+
+            ${(pictures.length) ? createPhotosTemplate(pictures) : ''}
+          </section>`
+);
 
 export const createEditFormTemplate = (point = {}, isEdit = false) => {
   const {
