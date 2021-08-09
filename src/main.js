@@ -7,8 +7,9 @@ import RouteAndDatesView from './view/route-and-dates.js';
 import SiteMenuView from './view/site-menu.js';
 import TotalPriceView from './view/total-price.js';
 import TripInfoView from './view/trip-info.js';
+import NoEventView from './view/no-event.js';
 import {compareTimeStart, render} from './utils.js';
-import {RenderPosition} from './const.js';
+import {FILTERS, RenderPosition} from './const.js';
 
 import {generatePoint} from './mock/point.js';
 
@@ -61,27 +62,44 @@ const renderEvent = (eventListElement, point) => {
   render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
-const pageHeaderElement = document.querySelector('.page-body');
-const tripMainElement = pageHeaderElement.querySelector('.trip-main');
+const renderBoard = (events) => {
+  const pageHeaderElement = document.querySelector('.page-body');
+  const tripMainElement = pageHeaderElement.querySelector('.trip-main');
 
-const tripInfoComponent = new TripInfoView();
-render(tripMainElement, tripInfoComponent.getElement(), RenderPosition.AFTERBEGIN);
-render(tripInfoComponent.getElement(), new RouteAndDatesView(points).getElement(), RenderPosition.BEFOREEND);
-render(tripInfoComponent.getElement(), new TotalPriceView(points).getElement(), RenderPosition.BEFOREEND);
+  const siteMenuElement = tripMainElement.querySelector('.trip-controls__navigation');
+  render(siteMenuElement, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
 
-const siteMenuElement = tripMainElement.querySelector('.trip-controls__navigation');
-render(siteMenuElement, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
+  const eventFilterElement = tripMainElement.querySelector('.trip-controls__filters');
+  render(eventFilterElement, new EventFiltersView().getElement(), RenderPosition.BEFOREEND);
 
-const eventFilterElement = tripMainElement.querySelector('.trip-controls__filters');
-render(eventFilterElement, new EventFiltersView().getElement(), RenderPosition.BEFOREEND);
+  const pageMainElement = document.querySelector('.page-main');
+  const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
-const pageMainElement = document.querySelector('.page-main');
-const tripEventsElement = pageMainElement.querySelector('.trip-events');
-render(tripEventsElement, new EventSortView().getElement(), RenderPosition.BEFOREEND);
+  if (!events || events.length === 0) {
+    render(tripEventsElement, new NoEventView(FILTERS[0]).getElement(), RenderPosition.BEFOREEND);
+    return;
+  }
 
-const eventListComponent = new EventListView();
-render(tripEventsElement, eventListComponent.getElement(), RenderPosition.BEFOREEND);
+  const tripInfoComponent = new TripInfoView();
+  render(tripMainElement, tripInfoComponent.getElement(), RenderPosition.AFTERBEGIN);
+  render(tripInfoComponent.getElement(), new RouteAndDatesView(events).getElement(), RenderPosition.BEFOREEND);
+  render(tripInfoComponent.getElement(), new TotalPriceView(events).getElement(), RenderPosition.BEFOREEND);
 
-for (let i = 0; i < points.length; i++) {
-  renderEvent(eventListComponent.getElement(), points[i]);
-}
+
+  render(tripEventsElement, new EventSortView().getElement(), RenderPosition.BEFOREEND);
+
+  const eventListComponent = new EventListView();
+  render(tripEventsElement, eventListComponent.getElement(), RenderPosition.BEFOREEND);
+
+  for (let i = 0; i < events.length; i++) {
+    renderEvent(eventListComponent.getElement(), events[i]);
+  }
+};
+
+renderBoard(points);
+
+
+
+
+
+
