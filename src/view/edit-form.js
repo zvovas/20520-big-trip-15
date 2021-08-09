@@ -59,14 +59,12 @@ const createPhotosTemplate = (photos) => (
 );
 
 const createDestinationInfoTemplate = ({description, pictures}) => (
-  (!description && (!pictures || !pictures.length))
-    ? ''
-    : `<section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            ${(description) ? createParagraphTemplate(description) : ''}
+  `<section class="event__section  event__section--destination">
+    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+    ${(description) ? createParagraphTemplate(description) : ''}
 
-            ${(pictures.length) ? createPhotosTemplate(pictures) : ''}
-          </section>`
+    ${(pictures.length) ? createPhotosTemplate(pictures) : ''}
+  </section>`
 );
 
 const createEditFormTemplate = (point = {}, isEdit = false) => {
@@ -85,7 +83,7 @@ const createEditFormTemplate = (point = {}, isEdit = false) => {
   const typeOffers = allOffers.find((item) => item.type === type).offers;
   const offersTemplate = (typeOffers && typeOffers.length > 0) ? createOffersTemplate(typeOffers, offers) : '';
   const information = (destination) ? allDestinations.find((item) => item.name === destination) : null;
-  const informationTemplate = (information) ? createDestinationInfoTemplate(information) : '';
+  const informationTemplate = (!information.description && (!information.pictures || !information.pictures.length)) ? '' : createDestinationInfoTemplate(information);
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
