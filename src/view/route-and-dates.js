@@ -1,4 +1,5 @@
-import {createElement, humanizeDateDayMonth, humanizeDateMonthDay} from '../utils.js';
+import AbstractView from './abstract.js';
+import {humanizeDateDayMonth, humanizeDateMonthDay} from '../utils.js';
 
 const MAX_CITIES_IN_ROUTE = 3;
 
@@ -24,25 +25,13 @@ const createRouteAndDatesTemplate = (points) => {
   </div>`;
 };
 
-export default class RouteAndDates {
+export default class RouteAndDates extends AbstractView {
   constructor(points) {
+    super();
     this._points = points;
-    this._element = null;
   }
 
   getTemplate() {
     return createRouteAndDatesTemplate(this._points);
-  }
-
-  getElement () {
-    if(!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement () {
-    this._element = null;
   }
 }

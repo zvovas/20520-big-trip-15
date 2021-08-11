@@ -97,9 +97,3 @@ const renderBoard = (events) => {
 };
 
 renderBoard(points);
-
-
-
-
-
-

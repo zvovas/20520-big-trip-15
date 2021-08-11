@@ -1,5 +1,6 @@
+import AbstractView from './abstract.js';
 import {DESTINATIONS, POINT_TYPES} from '../const.js';
-import {createElement, humanizeDateTime} from '../utils.js';
+import {humanizeDateTime} from '../utils.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
 
@@ -142,26 +143,14 @@ const createEditFormTemplate = (point = {}, isEdit = false) => {
   </li>`;
 };
 
-export default class EditForm {
+export default class EditForm extends AbstractView {
   constructor(point, isEdit) {
+    super();
     this._point = point;
     this._isEdit = isEdit;
-    this._element = null;
   }
 
   getTemplate() {
     return createEditFormTemplate(this._point, this._isEdit);
-  }
-
-  getElement () {
-    if(!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement () {
-    this._element = null;
   }
 }
