@@ -8,7 +8,8 @@ import SiteMenuView from './view/site-menu.js';
 import TotalPriceView from './view/total-price.js';
 import TripInfoView from './view/trip-info.js';
 import NoEventView from './view/no-event.js';
-import {compareTimeStart, render} from './utils.js';
+import {compareTimeStart} from './utils/dates.js';
+import {render, replace} from './utils/render.js';
 import {FILTERS, RenderPosition} from './const.js';
 
 import {generatePoint} from './mock/point.js';
@@ -22,11 +23,11 @@ const renderEvent = (eventListElement, point) => {
   const editFormComponent = new EditFormView(point, true);
 
   const replaceEventToForm = () => {
-    eventListElement.replaceChild(editFormComponent.getElement(), eventComponent.getElement());
+    replace(editFormComponent, eventComponent);
   };
 
   const replaceFormToEvent = () => {
-    eventListElement.replaceChild(eventComponent.getElement(), editFormComponent.getElement());
+    replace(eventComponent, editFormComponent);
   };
 
   function onEscKeydown (evt) {
@@ -52,7 +53,7 @@ const renderEvent = (eventListElement, point) => {
     document.removeEventListener('keydown', onEscKeydown);
   });
 
-  render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
+  render(eventListElement, eventComponent, RenderPosition.BEFOREEND);
 };
 
 const renderBoard = (events) => {
@@ -60,29 +61,29 @@ const renderBoard = (events) => {
   const tripMainElement = pageHeaderElement.querySelector('.trip-main');
 
   const siteMenuElement = tripMainElement.querySelector('.trip-controls__navigation');
-  render(siteMenuElement, new SiteMenuView().getElement(), RenderPosition.BEFOREEND);
+  render(siteMenuElement, new SiteMenuView(), RenderPosition.BEFOREEND);
 
   const eventFilterElement = tripMainElement.querySelector('.trip-controls__filters');
-  render(eventFilterElement, new EventFiltersView().getElement(), RenderPosition.BEFOREEND);
+  render(eventFilterElement, new EventFiltersView(), RenderPosition.BEFOREEND);
 
   const pageMainElement = document.querySelector('.page-main');
   const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
   if (!events || events.length === 0) {
-    render(tripEventsElement, new NoEventView(FILTERS[0]).getElement(), RenderPosition.BEFOREEND);
+    render(tripEventsElement, new NoEventView(FILTERS[0]), RenderPosition.BEFOREEND);
     return;
   }
 
   const tripInfoComponent = new TripInfoView();
-  render(tripMainElement, tripInfoComponent.getElement(), RenderPosition.AFTERBEGIN);
-  render(tripInfoComponent.getElement(), new RouteAndDatesView(events).getElement(), RenderPosition.BEFOREEND);
-  render(tripInfoComponent.getElement(), new TotalPriceView(events).getElement(), RenderPosition.BEFOREEND);
+  render(tripMainElement, tripInfoComponent, RenderPosition.AFTERBEGIN);
+  render(tripInfoComponent, new RouteAndDatesView(events), RenderPosition.BEFOREEND);
+  render(tripInfoComponent, new TotalPriceView(events), RenderPosition.BEFOREEND);
 
 
-  render(tripEventsElement, new EventSortView().getElement(), RenderPosition.BEFOREEND);
+  render(tripEventsElement, new EventSortView(), RenderPosition.BEFOREEND);
 
   const eventListComponent = new EventListView();
-  render(tripEventsElement, eventListComponent.getElement(), RenderPosition.BEFOREEND);
+  render(tripEventsElement, eventListComponent, RenderPosition.BEFOREEND);
 
   for (let i = 0; i < events.length; i++) {
     renderEvent(eventListComponent.getElement(), events[i]);

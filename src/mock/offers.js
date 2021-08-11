@@ -1,4 +1,4 @@
-import {getRandomArrayElement, getRandomInteger} from '../utils.js';
+import {getRandomArrayElement, getRandomInteger} from '../utils/common.js';
 import {POINT_TYPES} from '../const.js';
 
 const MAX_COUNT_OFFERS = 5;

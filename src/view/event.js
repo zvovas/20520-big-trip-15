@@ -4,7 +4,7 @@ import {
   humanizeDateMonthDay,
   humanizeTime,
   calculateTimeDifference
-} from '../utils.js';
+} from '../utils/dates.js';
 
 
 const createSelectedOfferTemplate = (offer) => (
