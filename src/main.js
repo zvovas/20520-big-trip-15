@@ -23,41 +23,34 @@ const renderEvent = (eventListElement, point) => {
 
   const replaceEventToForm = () => {
     eventListElement.replaceChild(editFormComponent.getElement(), eventComponent.getElement());
-    editFormComponent.getElement().querySelector('form').addEventListener('submit', onSubmit);
-    eventComponent.getElement().querySelector('.event__rollup-btn').removeEventListener('click', onOpenRollupButton);
-    editFormComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', onCloseRollupButton);
-    document.addEventListener('keydown', onEscKeydown);
   };
 
   const replaceFormToEvent = () => {
     eventListElement.replaceChild(eventComponent.getElement(), editFormComponent.getElement());
-    editFormComponent.getElement().querySelector('form').removeEventListener('submit', onSubmit);
-    editFormComponent.getElement().querySelector('.event__rollup-btn').removeEventListener('click', onCloseRollupButton);
-    eventComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', onOpenRollupButton);
-    document.removeEventListener('keydown', onEscKeydown);
   };
-
-  function onSubmit (evt)  {
-    evt.preventDefault();
-    replaceFormToEvent();
-  }
-
-  function onOpenRollupButton () {
-    replaceEventToForm();
-  }
-
-  function onCloseRollupButton () {
-    replaceFormToEvent();
-  }
 
   function onEscKeydown (evt) {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       replaceFormToEvent();
+      document.removeEventListener('keydown', onEscKeydown);
     }
   }
 
-  eventComponent.getElement().querySelector('.event__rollup-btn').addEventListener('click', onOpenRollupButton);
+  eventComponent.setEditClickHandler(() => {
+    replaceEventToForm();
+    document.addEventListener('keydown', onEscKeydown);
+  });
+
+  editFormComponent.setCloseClickHandler(() => {
+    replaceFormToEvent();
+    document.removeEventListener('keydown', onEscKeydown);
+  });
+
+  editFormComponent.setSubmitFormHandler(() => {
+    replaceFormToEvent();
+    document.removeEventListener('keydown', onEscKeydown);
+  });
 
   render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
 };
