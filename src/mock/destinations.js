@@ -1,4 +1,4 @@
-import {getRandomArrayElements, getRandomInteger} from '../utils.js';
+import {getRandomArrayElements, getRandomInteger} from '../utils/common.js';
 import {DESTINATIONS} from '../const.js';
 
 const MIN_COUNT_SENTENCES = 1;

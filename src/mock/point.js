@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import {POINT_TYPES, DESTINATIONS} from '../const.js';
 import {allOffers} from './offers.js';
-import {getRandomInteger, getRandomArrayElement, getRandomArrayElements} from '../utils.js';
+import {getRandomInteger, getRandomArrayElement, getRandomArrayElements} from '../utils/common.js';
 
 const generateType = () => getRandomArrayElement(POINT_TYPES);
 
