@@ -12,7 +12,7 @@ const createDatesTemplate =  (points) => {
   const dateStart = points[0].timeStart;
   const dateEnd = points[points.length - 1].timeEnd;
   return (dateStart.getMonth() === dateEnd.getMonth())
-    ? `${humanizeDateMonthDay(dateStart)}&nbsp;&mdash;&nbsp;${dateEnd.getDay()}`
+    ? `${humanizeDateMonthDay(dateStart)}&nbsp;&mdash;&nbsp;${dateEnd.getDate()}`
     : `${humanizeDateDayMonth(dateStart)}&nbsp;&mdash;&nbsp;${humanizeDateDayMonth(dateEnd)}`;
 };
 
