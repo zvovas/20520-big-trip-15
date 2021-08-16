@@ -22,8 +22,8 @@ const createSelectedOffersTemplate = (offers) => (
   </ul>`
 );
 
-const createEventTemplate = (point) => {
-  const {type, destination, offers, timeStart, timeEnd, price, isFavorite} = point;
+const createEventTemplate = (event) => {
+  const {type, destination, offers, timeStart, timeEnd, price, isFavorite} = event;
 
   const selectedOffers = (offers.length > 0) ? createSelectedOffersTemplate(offers) : '';
 
@@ -64,14 +64,14 @@ const createEventTemplate = (point) => {
 };
 
 export default class Event extends AbstractView {
-  constructor(point) {
+  constructor(event) {
     super();
-    this._point = point;
+    this._event = event;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createEventTemplate(this._point);
+    return createEventTemplate(this._event);
   }
 
   _editClickHandler(evt) {

@@ -1,5 +1,5 @@
 import AbstractView from './abstract.js';
-import {DESTINATIONS, POINT_TYPES} from '../const.js';
+import {DESTINATIONS, EVENT_TYPES} from '../const.js';
 import {humanizeDateTime} from '../utils/dates.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
@@ -25,14 +25,14 @@ const createOfferTemplate = ({title, price, isChecked = false}) => {
   </div>`;
 };
 
-const findCheckedOffers = (typeOffers, pointOffers) => {
-  typeOffers.forEach((typeOffer) => typeOffer.isChecked = !!pointOffers.some((pointOffer) => pointOffer.title === typeOffer.title));
+const findCheckedOffers = (typeOffers, eventOffers) => {
+  typeOffers.forEach((typeOffer) => typeOffer.isChecked = !!eventOffers.some((eventOffer) => eventOffer.title === typeOffer.title));
   return typeOffers;
 };
 
-const createAllOffersTemplate = (typeOffers, pointOffers) => (
-  (pointOffers && pointOffers.length > 0)
-    ? findCheckedOffers(typeOffers, pointOffers).map(createOfferTemplate).join('')
+const createAllOffersTemplate = (typeOffers, eventOffers) => (
+  (eventOffers && eventOffers.length > 0)
+    ? findCheckedOffers(typeOffers, eventOffers).map(createOfferTemplate).join('')
     : typeOffers.map(createOfferTemplate).join('')
 );
 
@@ -68,18 +68,18 @@ const createDestinationInfoTemplate = ({description, pictures}) => (
   </section>`
 );
 
-const createEditFormTemplate = (point = {}, isEdit = false) => {
+const createEditFormTemplate = (event = {}, isEdit = false) => {
   const {
-    type = POINT_TYPES[0],
+    type = EVENT_TYPES[0],
     destination = '',
     offers = null,
     timeStart,
     timeEnd,
     price = '',
-  } = point;
+  } = event;
 
-  const pointTypeFieldset = POINT_TYPES.map((pointType) => createEventTypeInputTemplate(pointType)).join('');
-  const destinationDatalist = DESTINATIONS.map((pointDestination) => createDestinationOptionTemplate(pointDestination)).join('');
+  const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType)).join('');
+  const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
   const typeOffers = allOffers.find((item) => item.type === type).offers;
   const offersTemplate = (typeOffers && typeOffers.length > 0) ? createOffersTemplate(typeOffers, offers) : '';
@@ -99,7 +99,7 @@ const createEditFormTemplate = (point = {}, isEdit = false) => {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${pointTypeFieldset}
+              ${eventTypeFieldset}
             </fieldset>
           </div>
         </div>
@@ -144,9 +144,9 @@ const createEditFormTemplate = (point = {}, isEdit = false) => {
 };
 
 export default class EditForm extends AbstractView {
-  constructor(point, isEdit) {
+  constructor(event, isEdit) {
     super();
-    this._point = point;
+    this._event = event;
     this._isEdit = isEdit;
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
@@ -154,7 +154,7 @@ export default class EditForm extends AbstractView {
   }
 
   getTemplate() {
-    return createEditFormTemplate(this._point, this._isEdit);
+    return createEditFormTemplate(this._event, this._isEdit);
   }
 
   _closeClickHandler(evt) {

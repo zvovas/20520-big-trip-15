@@ -81,9 +81,9 @@ export default class Trip {
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEvent(point) {
-    const eventComponent = new EventView(point);
-    const editFormComponent = new EditFormView(point, true);
+  _renderEvent(event) {
+    const eventComponent = new EventView(event);
+    const editFormComponent = new EditFormView(event, true);
 
     const replaceEventToForm = () => {
       replace(editFormComponent, eventComponent);

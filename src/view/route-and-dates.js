@@ -8,30 +8,30 @@ const createRouteTemplate = (destinations) => (destinations.length <= MAX_CITIES
   : `${destinations[0]}&nbsp;&mdash;&nbsp;&hellip;&nbsp;&mdash;&nbsp;${destinations[destinations.length - 1]}`;
 
 
-const createDatesTemplate =  (points) => {
-  const dateStart = points[0].timeStart;
-  const dateEnd = points[points.length - 1].timeEnd;
+const createDatesTemplate =  (events) => {
+  const dateStart = events[0].timeStart;
+  const dateEnd = events[events.length - 1].timeEnd;
   return (dateStart.getMonth() === dateEnd.getMonth())
     ? `${humanizeDateMonthDay(dateStart)}&nbsp;&mdash;&nbsp;${dateEnd.getDate()}`
     : `${humanizeDateDayMonth(dateStart)}&nbsp;&mdash;&nbsp;${humanizeDateDayMonth(dateEnd)}`;
 };
 
-const createRouteAndDatesTemplate = (points) => {
-  const destinations = points.map((point) => point.destination);
+const createRouteAndDatesTemplate = (events) => {
+  const destinations = events.map((event) => event.destination);
   return `<div class="trip-info__main">
     <h1 class="trip-info__title">${createRouteTemplate(destinations)}</h1>
 
-    <p class="trip-info__dates">${createDatesTemplate(points)}</p>
+    <p class="trip-info__dates">${createDatesTemplate(events)}</p>
   </div>`;
 };
 
 export default class RouteAndDates extends AbstractView {
-  constructor(points) {
+  constructor(events) {
     super();
-    this._points = points;
+    this._events = events;
   }
 
   getTemplate() {
-    return createRouteAndDatesTemplate(this._points);
+    return createRouteAndDatesTemplate(this._events);
   }
 }
