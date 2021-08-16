@@ -6,6 +6,7 @@ import TotalPriceView from '../view/total-price.js';
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
+import EventPresenter from './event.js'
 import {render, replace} from '../utils/render.js';
 import {FILTERS, RenderPosition} from '../const.js';
 import EventView from '../view/event.js';
@@ -82,41 +83,8 @@ export default class Trip {
   }
 
   _renderEvent(event) {
-    const eventComponent = new EventView(event);
-    const editFormComponent = new EditFormView(event, true);
-
-    const replaceEventToForm = () => {
-      replace(editFormComponent, eventComponent);
-    };
-
-    const replaceFormToEvent = () => {
-      replace(eventComponent, editFormComponent);
-    };
-
-    function onEscKeydown (evt) {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceFormToEvent();
-        document.removeEventListener('keydown', onEscKeydown);
-      }
-    }
-
-    eventComponent.setEditClickHandler(() => {
-      replaceEventToForm();
-      document.addEventListener('keydown', onEscKeydown);
-    });
-
-    editFormComponent.setCloseClickHandler(() => {
-      replaceFormToEvent();
-      document.removeEventListener('keydown', onEscKeydown);
-    });
-
-    editFormComponent.setSubmitFormHandler(() => {
-      replaceFormToEvent();
-      document.removeEventListener('keydown', onEscKeydown);
-    });
-
-    render(this._eventListComponent, eventComponent, RenderPosition.BEFOREEND);
+    const eventPresenter = new EventPresenter(this._eventListComponent);
+    eventPresenter.init(event);
   }
 
   _renderEvents() {
