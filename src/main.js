@@ -1,93 +1,17 @@
-import EditFormView from './view/edit-form.js';
-import EventView from './view/event.js';
-import EventFiltersView from './view/event-filters.js';
-import EventListView from './view/event-list.js';
-import EventSortView from './view/event-sort.js';
-import RouteAndDatesView from './view/route-and-dates.js';
-import SiteMenuView from './view/site-menu.js';
-import TotalPriceView from './view/total-price.js';
-import TripInfoView from './view/trip-info.js';
-import NoEventView from './view/no-event.js';
+import TripPresenter from './presenter/board.js';
 import {compareTimeStart} from './utils/dates.js';
-import {render, replace} from './utils/render.js';
-import {FILTERS, RenderPosition} from './const.js';
 
 import {generatePoint} from './mock/point.js';
 
 const TRIP_EVENT_COUNT = 15;
 
-const points = Array(TRIP_EVENT_COUNT).fill().map(generatePoint).sort(compareTimeStart);
+const points = Array(TRIP_EVENT_COUNT).fill(null).map(generatePoint).sort(compareTimeStart);
 
-const renderEvent = (eventListElement, point) => {
-  const eventComponent = new EventView(point);
-  const editFormComponent = new EditFormView(point, true);
+const pageHeaderElement = document.querySelector('.page-header');
+const tripMainElement = pageHeaderElement.querySelector('.trip-main');
 
-  const replaceEventToForm = () => {
-    replace(editFormComponent, eventComponent);
-  };
+const pageMainElement = document.querySelector('.page-main');
+const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
-  const replaceFormToEvent = () => {
-    replace(eventComponent, editFormComponent);
-  };
-
-  function onEscKeydown (evt) {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      replaceFormToEvent();
-      document.removeEventListener('keydown', onEscKeydown);
-    }
-  }
-
-  eventComponent.setEditClickHandler(() => {
-    replaceEventToForm();
-    document.addEventListener('keydown', onEscKeydown);
-  });
-
-  editFormComponent.setCloseClickHandler(() => {
-    replaceFormToEvent();
-    document.removeEventListener('keydown', onEscKeydown);
-  });
-
-  editFormComponent.setSubmitFormHandler(() => {
-    replaceFormToEvent();
-    document.removeEventListener('keydown', onEscKeydown);
-  });
-
-  render(eventListElement, eventComponent, RenderPosition.BEFOREEND);
-};
-
-const renderBoard = (events) => {
-  const pageHeaderElement = document.querySelector('.page-body');
-  const tripMainElement = pageHeaderElement.querySelector('.trip-main');
-
-  const siteMenuElement = tripMainElement.querySelector('.trip-controls__navigation');
-  render(siteMenuElement, new SiteMenuView(), RenderPosition.BEFOREEND);
-
-  const eventFilterElement = tripMainElement.querySelector('.trip-controls__filters');
-  render(eventFilterElement, new EventFiltersView(), RenderPosition.BEFOREEND);
-
-  const pageMainElement = document.querySelector('.page-main');
-  const tripEventsElement = pageMainElement.querySelector('.trip-events');
-
-  if (!events || events.length === 0) {
-    render(tripEventsElement, new NoEventView(FILTERS[0]), RenderPosition.BEFOREEND);
-    return;
-  }
-
-  const tripInfoComponent = new TripInfoView();
-  render(tripMainElement, tripInfoComponent, RenderPosition.AFTERBEGIN);
-  render(tripInfoComponent, new RouteAndDatesView(events), RenderPosition.BEFOREEND);
-  render(tripInfoComponent, new TotalPriceView(events), RenderPosition.BEFOREEND);
-
-
-  render(tripEventsElement, new EventSortView(), RenderPosition.BEFOREEND);
-
-  const eventListComponent = new EventListView();
-  render(tripEventsElement, eventListComponent, RenderPosition.BEFOREEND);
-
-  for (let i = 0; i < events.length; i++) {
-    renderEvent(eventListComponent.getElement(), events[i]);
-  }
-};
-
-renderBoard(points);
+const tripPresenter = new TripPresenter(tripMainElement, tripEventsElement);
+tripPresenter.init(points);
