@@ -3,16 +3,25 @@ import EditFormView from '../view/edit-form.js';
 import {remove, render, replace} from '../utils/render.js';
 import {RenderPosition} from '../const.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+}
+
 export default class Event {
-  constructor(eventListContainer) {
+  constructor(eventListContainer, changeData, changeMode) {
     this._eventListContainer = eventListContainer;
+    this._changeData = changeData;
+    this._changeMode = changeMode;
 
     this._eventComponent = null;
     this._editFormComponent = null;
+    this._mode = Mode.DEFAULT;
 
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleCloseClick = this._handleCloseClick.bind(this);
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
+    this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
 
   init(event) {
@@ -25,6 +34,7 @@ export default class Event {
     this._editFormComponent = new EditFormView(event, true);
 
     this._eventComponent.setEditClickHandler(this._handleEditClick);
+    this._eventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._editFormComponent.setCloseClickHandler(this._handleCloseClick);
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);
 
@@ -50,14 +60,23 @@ export default class Event {
     remove(this._editFormComponent);
   }
 
+  resetView() {
+    if (this._mode !== Mode.DEFAULT) {
+      this._replaceFormToEvent();
+    }
+  }
+
   _replaceEventToForm() {
     replace(this._editFormComponent, this._eventComponent);
     document.addEventListener('keydown', this._EscKeydownHandler);
+    this._changeMode();
+    this._mode = Mode.EDITING;
   }
 
   _replaceFormToEvent() {
     replace(this._eventComponent, this._editFormComponent);
     document.removeEventListener('keydown', this._EscKeydownHandler);
+    this._mode = Mode.DEFAULT;
   }
 
   _EscKeydownHandler(evt) {
@@ -78,5 +97,17 @@ export default class Event {
 
   _handleSubmitForm() {
     this._replaceFormToEvent();
+  }
+
+  _handleFavoriteClick() {
+    this._changeData(
+      Object.assign(
+        {},
+        this._event,
+        {
+          isFavorite: !this._event.isFavorite,
+        },
+      ),
+    );
   }
 }

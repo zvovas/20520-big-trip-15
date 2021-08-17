@@ -6,16 +6,16 @@ import TotalPriceView from '../view/total-price.js';
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
-import EventPresenter from './event.js'
-import {render, replace} from '../utils/render.js';
+import EventPresenter from './event.js';
+import {render} from '../utils/render.js';
 import {FILTERS, RenderPosition} from '../const.js';
-import EventView from '../view/event.js';
-import EditFormView from '../view/edit-form.js';
+import {updateItem} from '../utils/common.js';
 
 export default class Trip {
   constructor(boardHeaderContainer, boardMainContainer) {
     this._boardHeaderContainer = boardHeaderContainer;
     this._boardMainContainer = boardMainContainer;
+    this._eventPresenter = new Map();
 
     this._siteMenuComponent = new SiteMenuView();
     this._eventFiltersComponent = new EventFiltersView();
@@ -23,6 +23,9 @@ export default class Trip {
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView(FILTERS[0]);
+
+    this._handleEventChange = this._handleEventChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(events) {
@@ -82,16 +85,31 @@ export default class Trip {
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEvent(event) {
-    const eventPresenter = new EventPresenter(this._eventListComponent);
-    eventPresenter.init(event);
-  }
-
   _renderEvents() {
     this._events.forEach((event) => this._renderEvent(event));
   }
 
+  _renderEvent(event) {
+    const eventPresenter = new EventPresenter(this._eventListComponent, this._handleEventChange, this._handleModeChange);
+    eventPresenter.init(event);
+    this._eventPresenter.set(event.id, eventPresenter);
+  }
+
+  _clearEventList() {
+    this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
+    this._eventPresenter.clear();
+  }
+
   _renderNoEvent() {
     render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _handleEventChange(updatedEvent) {
+    this._events = updateItem(this._events, updatedEvent);
+    this._eventPresenter.get(updatedEvent.id).init(updatedEvent);
+  }
+
+  _handleModeChange() {
+    this._eventPresenter.forEach((eventPresenter) => eventPresenter.resetView());
   }
 }
