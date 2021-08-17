@@ -6,7 +6,7 @@ import {RenderPosition} from '../const.js';
 const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
-}
+};
 
 export default class Event {
   constructor(eventListContainer, changeData, changeMode) {
