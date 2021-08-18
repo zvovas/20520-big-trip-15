@@ -22,8 +22,8 @@ const createSelectedOffersTemplate = (offers) => (
   </ul>`
 );
 
-const createEventTemplate = (point) => {
-  const {type, destination, offers, timeStart, timeEnd, price, isFavorite} = point;
+const createEventTemplate = (event) => {
+  const {type, destination, offers, timeStart, timeEnd, price, isFavorite} = event;
 
   const selectedOffers = (offers.length > 0) ? createSelectedOffersTemplate(offers) : '';
 
@@ -64,14 +64,15 @@ const createEventTemplate = (point) => {
 };
 
 export default class Event extends AbstractView {
-  constructor(point) {
+  constructor(event) {
     super();
-    this._point = point;
+    this._event = event;
     this._editClickHandler = this._editClickHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createEventTemplate(this._point);
+    return createEventTemplate(this._event);
   }
 
   _editClickHandler(evt) {
@@ -82,5 +83,15 @@ export default class Event extends AbstractView {
   setEditClickHandler(callback) {
     this._callback.editClick = callback;
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector('.event__favorite-btn').addEventListener('click', this._favoriteClickHandler);
   }
 }

@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
-import {POINT_TYPES, DESTINATIONS} from '../const.js';
+import {EVENT_TYPES, DESTINATIONS} from '../const.js';
 import {allOffers} from './offers.js';
 import {getRandomInteger, getRandomArrayElement, getRandomArrayElements} from '../utils/common.js';
+import {nanoid} from 'nanoid';
 
-const generateType = () => getRandomArrayElement(POINT_TYPES);
+const generateType = () => getRandomArrayElement(EVENT_TYPES);
 
 const generateDestination = () => getRandomArrayElement(DESTINATIONS);
 
@@ -15,7 +16,7 @@ const generateTimeStart = () => {
   return dayjs().add(daysGap, 'day').toDate();
 };
 
-export const generatePoint = () => {
+export const generateEvent = () => {
   const type = generateType();
   const typeOffers = allOffers.find((item) => item.type === type).offers;
   const destination = generateDestination();
@@ -23,6 +24,7 @@ export const generatePoint = () => {
   const timeEnd = dayjs(timeStart).add(getRandomInteger(30, 2160), 'minute').toDate();
 
   return {
+    id: nanoid(),
     type,
     destination,
     offers: getRandomArrayElements(typeOffers, getRandomInteger(0, typeOffers.length)),

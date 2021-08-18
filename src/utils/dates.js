@@ -29,4 +29,4 @@ export const calculateTimeDifference = (dateA, dateB) => {
   }
 };
 
-export const compareTimeStart = (pointA, pointB) => pointA.timeStart - pointB.timeStart;
+export const compareTimeStart = (eventA, eventB) => eventA.timeStart - eventB.timeStart;
