@@ -1,5 +1,5 @@
 import AbstractView from './abstract.js';
-import {humanizeDateDayMonth, humanizeDateMonthDay} from '../utils/dates.js';
+import {humanizeDateDayMonth, humanizeDateMonthDay} from '../utils/events.js';
 
 const MAX_CITIES_IN_ROUTE = 3;
 

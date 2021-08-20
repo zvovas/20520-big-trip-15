@@ -7,6 +7,7 @@ import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
+import SortPresenter from './sort.js';
 import {render} from '../utils/render.js';
 import {FILTERS, RenderPosition} from '../const.js';
 import {updateItem} from '../utils/common.js';
@@ -26,6 +27,7 @@ export default class Trip {
 
     this._handleEventChange = this._handleEventChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleOrderChange = this._handleOrderChange.bind(this);
   }
 
   init(events) {
@@ -78,7 +80,7 @@ export default class Trip {
   }
 
   _renderEventSort() {
-    render(this._boardMainContainer, this._eventSortComponent, RenderPosition.BEFOREEND);
+    new SortPresenter(this._boardMainContainer, this._events, this._handleOrderChange);
   }
 
   _renderEventList() {
@@ -102,6 +104,11 @@ export default class Trip {
 
   _renderNoEvent() {
     render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _handleOrderChange() {
+    this._clearEventList();
+    this._renderEvents();
   }
 
   _handleEventChange(updatedEvent) {
