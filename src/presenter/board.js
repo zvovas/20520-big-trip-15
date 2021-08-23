@@ -8,8 +8,9 @@ import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
 import {render} from '../utils/render.js';
-import {FILTERS, RenderPosition} from '../const.js';
+import {FILTERS, RenderPosition, SortType} from '../const.js';
 import {updateItem} from '../utils/common.js';
+import {compareDuration, comparePrice, compareTimeStart} from '../utils/events';
 
 export default class Trip {
   constructor(boardHeaderContainer, boardMainContainer) {
@@ -23,9 +24,11 @@ export default class Trip {
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView(FILTERS[0]);
+    this._currentSortType = SortType.DAY;
 
     this._handleEventChange = this._handleEventChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleChangeSortType = this._handleChangeSortType.bind(this);
   }
 
   init(events) {
@@ -79,6 +82,7 @@ export default class Trip {
 
   _renderEventSort() {
     render(this._boardMainContainer, this._eventSortComponent, RenderPosition.BEFOREEND);
+    this._eventSortComponent.setChangeSortTypeHandler(this._handleChangeSortType);
   }
 
   _renderEventList() {
@@ -102,6 +106,32 @@ export default class Trip {
 
   _renderNoEvent() {
     render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _sortEvents(sortType) {
+    switch (sortType) {
+      case SortType.DAY:
+        this._events.sort(compareTimeStart);
+        break;
+      case SortType.TIME:
+        this._events.sort(compareDuration);
+        break;
+      case SortType.PRICE:
+        this._events.sort(comparePrice);
+        break;
+    }
+
+    this._currentSortType = sortType;
+  }
+
+  _handleChangeSortType(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+
+    this._sortEvents(sortType);
+    this._clearEventList();
+    this._renderEvents();
   }
 
   _handleEventChange(updatedEvent) {

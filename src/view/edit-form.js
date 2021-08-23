@@ -1,6 +1,6 @@
 import AbstractView from './abstract.js';
 import {DESTINATIONS, EVENT_TYPES} from '../const.js';
-import {humanizeDateTime} from '../utils/dates.js';
+import {humanizeDateTime} from '../utils/events.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
 

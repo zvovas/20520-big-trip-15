@@ -1,5 +1,5 @@
 import TripPresenter from './presenter/board.js';
-import {compareTimeStart} from './utils/dates.js';
+import {compareTimeStart} from './utils/events.js';
 
 import {generateEvent} from './mock/event.js';
 
