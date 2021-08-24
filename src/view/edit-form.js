@@ -63,12 +63,12 @@ const createPhotosTemplate = (photos) => (
   </div>`
 );
 
-const createDestinationInfoTemplate = ({description, pictures}) => (
+const createDestinationInfoTemplate = ({description, pictures}, isDescription, isPhotos) => (
   `<section class="event__section  event__section--destination">
     <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-    ${(description) ? createParagraphTemplate(description) : ''}
+    ${(isDescription) ? createParagraphTemplate(description) : ''}
 
-    ${(pictures.length) ? createPhotosTemplate(pictures) : ''}
+    ${(isPhotos) ? createPhotosTemplate(pictures) : ''}
   </section>`
 );
 
@@ -81,14 +81,16 @@ const createEditFormTemplate = (data, isEdit = false) => {
     timeEnd,
     price,
     offersOfType,
+    information,
+    isDescription,
+    isPhotos,
   } = data;
 
   const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType)).join('');
   const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
-  const offersTemplate = (offersOfType && offersOfType.length > 0) ? createOffersTemplate(offersOfType, offers) : '';
-  const information = (destination) ? allDestinations.find((item) => item.name === destination) : null;
-  const informationTemplate = (!information.description && (!information.pictures || !information.pictures.length)) ? '' : createDestinationInfoTemplate(information);
+  const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers) : '';
+  const informationTemplate = (information) ? createDestinationInfoTemplate(information, isDescription, isPhotos) : '';
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -157,6 +159,7 @@ export default class EditForm extends SmartView {
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._changeTypeHandler = this._changeTypeHandler.bind(this);
     this._changeOffersHandler = this._changeOffersHandler.bind(this);
+    this._changeDestinationHandler = this._changeDestinationHandler.bind(this);
 
     this._setInnerHandler();
   }
@@ -185,6 +188,27 @@ export default class EditForm extends SmartView {
     this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
   }
 
+  _changeDestinationHandler(evt) {
+    evt.preventDefault();
+    const inputDestination = evt.currentTarget;
+    if (!DESTINATIONS.some((destination) => destination === inputDestination.value)) {
+      this.updateData({
+        destination: inputDestination.value,
+      }, true);
+      inputDestination.setCustomValidity('Please select a city from the list');
+      inputDestination.reportValidity();
+      return;
+    }
+
+    const information = allDestinations.find((item) => item.name === inputDestination.value);
+    this.updateData({
+      destination: inputDestination.value,
+      information,
+      isDescription: !!information.description,
+      isPhotos: Boolean(information.pictures && information.pictures.length),
+    });
+  }
+
   _changeTypeHandler(evt) {
     evt.preventDefault();
     this.updateData(
@@ -197,6 +221,7 @@ export default class EditForm extends SmartView {
   }
 
   _changeOffersHandler(evt) {
+    evt.preventDefault();
     const name =  evt.target.name.split('-').splice(2).join(' ');
 
     if (evt.target.checked) {
@@ -209,9 +234,11 @@ export default class EditForm extends SmartView {
   _setInnerHandler() {
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._changeTypeHandler);
 
-    if (this._data.offersOfType && this._data.offersOfType.length > 0) {
+    if (this._data.offersOfType && this._data.offersOfType.length) {
       this.getElement().querySelector('.event__available-offers').addEventListener('change', this._changeOffersHandler);
     }
+
+    this.getElement().querySelector('.event__input--destination').addEventListener('input', this._changeDestinationHandler);
   }
 
   restoreHandlers() {
@@ -221,11 +248,15 @@ export default class EditForm extends SmartView {
   }
 
   static parseEventToData(event) {
+    const information = (event.destination) ? allDestinations.find((item) => item.name === event.destination) : null;
     return Object.assign(
       {},
       event,
       {
         offersOfType: allOffers.find((item) => item.type === event.type).offers.slice(),
+        information,
+        isDescription: !!information.description,
+        isPhotos: Boolean(information.pictures && information.pictures.length),
       },
     );
   }
@@ -234,6 +265,9 @@ export default class EditForm extends SmartView {
     const event = Object.assign({}, data);
 
     delete event.offersOfType;
+    delete event.information;
+    delete event.isDescription;
+    delete event.isPhotos;
 
     return event;
   }
