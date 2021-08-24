@@ -247,6 +247,10 @@ export default class EditForm extends SmartView {
     this.setSubmitFormHandler(this._callback.submitForm);
   }
 
+  reset(event) {
+    this.updateData(EditForm.parseEventToData(event));
+  }
+
   static parseEventToData(event) {
     const information = (event.destination) ? allDestinations.find((item) => item.name === event.destination) : null;
     return Object.assign(
