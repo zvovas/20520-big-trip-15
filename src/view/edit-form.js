@@ -1,8 +1,17 @@
-import AbstractView from './abstract.js';
+import SmartView from './smart.js';
 import {DESTINATIONS, EVENT_TYPES} from '../const.js';
 import {humanizeDateTime} from '../utils/events.js';
 import {allDestinations} from '../mock/destinations.js';
 import {allOffers} from '../mock/offers.js';
+
+const BLANK_EVENT = {
+  type: EVENT_TYPES[0],
+  destination: '',
+  offers: [],
+  timeStart: '',
+  timeEnd: '',
+  price: '',
+};
 
 const createEventTypeInputTemplate = (type) => (
   `<div class="event__type-item">
@@ -13,7 +22,7 @@ const createEventTypeInputTemplate = (type) => (
 
 const createDestinationOptionTemplate = (destination) => `<option value="${destination}"></option>`;
 
-const createOfferTemplate = ({title, price, isChecked = false}) => {
+const createOfferTemplate = ({title, price}, isChecked = false) => {
   const checkedStatus = (isChecked) ? 'checked' : '';
   return `<div class="event__offer-selector">
     <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title.split(' ').join('-')}-1" type="checkbox" name="event-offer-${title.split(' ').join('-')}" ${checkedStatus}>
@@ -25,20 +34,15 @@ const createOfferTemplate = ({title, price, isChecked = false}) => {
   </div>`;
 };
 
-const findCheckedOffers = (typeOffers, eventOffers) => {
-  typeOffers.forEach((typeOffer) => typeOffer.isChecked = !!eventOffers.some((eventOffer) => eventOffer.title === typeOffer.title));
-  return typeOffers;
-};
+const createAllOffersTemplate = (offersOfType, offersOfData) => offersOfType.map((offerOfType) => (
+  offersOfData.some((offerOfData) => offerOfData.title === offerOfType.title)
+    ? createOfferTemplate(offerOfType, true)
+    : createOfferTemplate(offerOfType, false)
+)).join('');
 
-const createAllOffersTemplate = (typeOffers, eventOffers) => (
-  (eventOffers && eventOffers.length > 0)
-    ? findCheckedOffers(typeOffers, eventOffers).map(createOfferTemplate).join('')
-    : typeOffers.map(createOfferTemplate).join('')
-);
+const createOffersTemplate = (offersOfType, offersOfData) => {
 
-const createOffersTemplate = (typeOffers, offers) => {
-
-  const offersTemplate = createAllOffersTemplate(typeOffers, offers);
+  const offersTemplate = createAllOffersTemplate(offersOfType, offersOfData);
 
   return `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -68,21 +72,21 @@ const createDestinationInfoTemplate = ({description, pictures}) => (
   </section>`
 );
 
-const createEditFormTemplate = (event = {}, isEdit = false) => {
+const createEditFormTemplate = (data, isEdit = false) => {
   const {
-    type = EVENT_TYPES[0],
-    destination = '',
-    offers = null,
+    type,
+    destination,
+    offers,
     timeStart,
     timeEnd,
-    price = '',
-  } = event;
+    price,
+    offersOfType,
+  } = data;
 
   const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType)).join('');
   const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
-  const typeOffers = allOffers.find((item) => item.type === type).offers;
-  const offersTemplate = (typeOffers && typeOffers.length > 0) ? createOffersTemplate(typeOffers, offers) : '';
+  const offersTemplate = (offersOfType && offersOfType.length > 0) ? createOffersTemplate(offersOfType, offers) : '';
   const information = (destination) ? allDestinations.find((item) => item.name === destination) : null;
   const informationTemplate = (!information.description && (!information.pictures || !information.pictures.length)) ? '' : createDestinationInfoTemplate(information);
 
@@ -143,18 +147,22 @@ const createEditFormTemplate = (event = {}, isEdit = false) => {
   </li>`;
 };
 
-export default class EditForm extends AbstractView {
-  constructor(event, isEdit) {
+export default class EditForm extends SmartView {
+  constructor(event = BLANK_EVENT, isEdit) {
     super();
-    this._event = event;
+    this._data = EditForm.parseEventToData(event);
     this._isEdit = isEdit;
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._changeTypeHandler = this._changeTypeHandler.bind(this);
+    this._changeOffersHandler = this._changeOffersHandler.bind(this);
+
+    this._setInnerHandler();
   }
 
   getTemplate() {
-    return createEditFormTemplate(this._event, this._isEdit);
+    return createEditFormTemplate(this._data, this._isEdit);
   }
 
   _closeClickHandler(evt) {
@@ -169,11 +177,64 @@ export default class EditForm extends AbstractView {
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.submitForm();
+    this._callback.submitForm(EditForm.parseDataToEvent(this._data));
   }
 
   setSubmitFormHandler(callback) {
     this._callback.submitForm = callback;
     this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  _changeTypeHandler(evt) {
+    evt.preventDefault();
+    this.updateData(
+      {
+        type: evt.target.value,
+        offersOfType: allOffers.find((item) => item.type === evt.target.value).offers.slice(),
+        offers: [],
+      },
+    );
+  }
+
+  _changeOffersHandler(evt) {
+    const name =  evt.target.name.split('-').splice(2).join(' ');
+
+    if (evt.target.checked) {
+      this._data.offers.push(this._data.offersOfType.find((offer) => offer.title === name));
+    } else {
+      this._data.offers.splice(this._data.offers.findIndex((offer) => offer.title === name), 1);
+    }
+  }
+
+  _setInnerHandler() {
+    this.getElement().querySelector('.event__type-group').addEventListener('change', this._changeTypeHandler);
+
+    if (this._data.offersOfType && this._data.offersOfType.length > 0) {
+      this.getElement().querySelector('.event__available-offers').addEventListener('change', this._changeOffersHandler);
+    }
+  }
+
+  restoreHandlers() {
+    this._setInnerHandler();
+    this.setCloseClickHandler(this._callback.closeClick);
+    this.setSubmitFormHandler(this._callback.submitForm);
+  }
+
+  static parseEventToData(event) {
+    return Object.assign(
+      {},
+      event,
+      {
+        offersOfType: allOffers.find((item) => item.type === event.type).offers.slice(),
+      },
+    );
+  }
+
+  static parseDataToEvent(data) {
+    const event = Object.assign({}, data);
+
+    delete event.offersOfType;
+
+    return event;
   }
 }
