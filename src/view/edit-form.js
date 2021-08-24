@@ -198,7 +198,10 @@ export default class EditForm extends SmartView {
 
   _changeDestinationHandler(evt) {
     evt.preventDefault();
+
     const inputDestination = evt.currentTarget;
+
+    inputDestination.setCustomValidity('');
     if (!DESTINATIONS.some((destination) => destination === inputDestination.value)) {
       this.updateData({
         destination: inputDestination.value,
