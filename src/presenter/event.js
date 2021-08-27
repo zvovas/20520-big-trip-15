@@ -1,7 +1,7 @@
 import EventView from '../view/event.js';
 import EditFormView from '../view/edit-form.js';
 import {remove, render, replace} from '../utils/render.js';
-import {RenderPosition} from '../const.js';
+import {RenderPosition, UpdateType, UserAction} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -96,13 +96,16 @@ export default class Event {
     this._replaceFormToEvent();
   }
 
+  //TODO: Изменить UpdateType
   _handleSubmitForm(task) {
-    this._changeData(task);
+    this._changeData(UserAction.UPDATE_EVENT, UpdateType.PATCH, task);
     this._replaceFormToEvent();
   }
 
   _handleFavoriteClick() {
     this._changeData(
+      UserAction.UPDATE_EVENT,
+      UpdateType.PATCH,
       Object.assign(
         {},
         this._event,
