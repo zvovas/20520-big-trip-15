@@ -1,8 +1,6 @@
 import SmartView from './smart.js';
 import {DESTINATIONS, EVENT_TYPES} from '../const.js';
 import {humanizeDateTime} from '../utils/events.js';
-import {allDestinations} from '../mock/destinations.js';
-import {allOffers} from '../mock/offers.js';
 
 const BLANK_EVENT = {
   type: EVENT_TYPES[0],
@@ -73,7 +71,7 @@ const createDestinationInfoTemplate = ({description, pictures}, isDescription, i
   </section>`
 );
 
-const createEditFormTemplate = (data, isEdit = false) => {
+const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
   const {
     type,
     destination,
@@ -86,7 +84,8 @@ const createEditFormTemplate = (data, isEdit = false) => {
     isPhotos,
   } = data;
 
-  const offersOfType = allOffers.find((item) => item.type === type).offers.slice();
+  //TODO: Убрать прямое обращение allOffers
+  const offersOfType = currentOffersOfType.slice();
   const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
   const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
@@ -151,9 +150,11 @@ const createEditFormTemplate = (data, isEdit = false) => {
 };
 
 export default class EditForm extends SmartView {
-  constructor(event = BLANK_EVENT, isEdit) {
+  constructor(event = BLANK_EVENT, destinationInfo, currentOffersOfType, isEdit) {
     super();
     this._data = EditForm.parseEventToData(event);
+    this._destinationInfo = destinationInfo;
+    this._currentOffersOfType = currentOffersOfType;
     this._isEdit = isEdit;
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
@@ -166,7 +167,7 @@ export default class EditForm extends SmartView {
   }
 
   getTemplate() {
-    return createEditFormTemplate(this._data, this._isEdit);
+    return createEditFormTemplate(this._data, this._currentOffersOfType.offers, this._isEdit);
   }
 
   _closeClickHandler(evt) {
@@ -184,7 +185,7 @@ export default class EditForm extends SmartView {
 
     const eventOffers = [];
     const eventOfferElements = this.getElement().querySelectorAll('.event__offer-checkbox');
-    const offersOfType = allOffers.find((item) => item.type === this._data.type).offers.slice();
+    const offersOfType = this._currentOffersOfType.offers;
 
     eventOfferElements.forEach((element) => {
       if (element.checked) {
@@ -223,17 +224,23 @@ export default class EditForm extends SmartView {
       return;
     }
 
-    const information = allDestinations.find((item) => item.name === inputDestination.value);
+    this._destinationInfo = this._callback.changeDestination(inputDestination.value);
     this.updateData({
       destination: inputDestination.value,
-      information,
-      isDescription: !!information.description,
-      isPhotos: Boolean(information.pictures && information.pictures.length),
+      information: this._destinationInfo,
+      isDescription: !!this._destinationInfo.description,
+      isPhotos: Boolean(this._destinationInfo.pictures && this._destinationInfo.pictures.length),
     });
+  }
+
+  setChangeDestinationHandler(callback) {
+    this._callback.changeDestination = callback;
+    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._changeDestinationHandler);
   }
 
   _changeTypeHandler(evt) {
     evt.preventDefault();
+    this._currentOffersOfType = this._callback.changeType(evt.target.value);
     this.updateData(
       {
         type: evt.target.value,
@@ -242,9 +249,12 @@ export default class EditForm extends SmartView {
     );
   }
 
-  _setInnerHandler() {
+  setChangeTypeHandler(callback) {
+    this._callback.changeType = callback;
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._changeTypeHandler);
-    this.getElement().querySelector('.event__input--destination').addEventListener('change', this._changeDestinationHandler);
+  }
+
+  _setInnerHandler() {
     this.getElement().querySelector('.event__input--price').addEventListener('input', this._changePriceHandler);
   }
 
@@ -252,21 +262,22 @@ export default class EditForm extends SmartView {
     this._setInnerHandler();
     this.setCloseClickHandler(this._callback.closeClick);
     this.setSubmitFormHandler(this._callback.submitForm);
+    this.setChangeDestinationHandler(this._callback.changeDestination);
   }
 
   reset(event) {
     this.updateData(EditForm.parseEventToData(event));
   }
 
-  static parseEventToData(event) {
-    const information = (event.destination) ? allDestinations.find((item) => item.name === event.destination) : null;
+  static parseEventToData(event, destinationInfo) {
+    const information = (event.destination) ? destinationInfo : null;
     return Object.assign(
       {},
       event,
       {
         information,
-        isDescription: !!information.description,
-        isPhotos: Boolean(information.pictures && information.pictures.length),
+        isDescription: Boolean(information && information.description),
+        isPhotos: Boolean(information && information.pictures && information.pictures.length),
       },
     );
   }

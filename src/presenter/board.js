@@ -11,11 +11,13 @@ import {render} from '../utils/render.js';
 import {FILTERS, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
 import {compareDuration, comparePrice, compareTimeStart} from '../utils/events';
 
-export default class Trip {
-  constructor(boardHeaderContainer, boardMainContainer, eventsModel) {
+export default class Board {
+  constructor(boardHeaderContainer, boardMainContainer, eventsModel, destinationsModel, offersModel) {
     this._boardHeaderContainer = boardHeaderContainer;
     this._boardMainContainer = boardMainContainer;
     this._eventsModel = eventsModel;
+    this._destinationsModel = destinationsModel;
+    this._offersModel = offersModel;
     this._eventPresenter = new Map();
 
     this._siteMenuComponent = new SiteMenuView();
@@ -141,7 +143,7 @@ export default class Trip {
   }
 
   _renderEvent(event) {
-    const eventPresenter = new EventPresenter(this._eventListComponent, this._handleViewAction, this._handleModeChange);
+    const eventPresenter = new EventPresenter(this._eventListComponent, this._destinationsModel, this._offersModel, this._handleViewAction, this._handleModeChange);
     eventPresenter.init(event);
     this._eventPresenter.set(event.id, eventPresenter);
   }
