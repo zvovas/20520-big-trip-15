@@ -26,6 +26,7 @@ export default class Event {
     this._handleChangeDestination = this._handleChangeDestination.bind(this);
     this._handleChangeType = this._handleChangeType.bind(this);
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
     this._escKeydownHandler = this._escKeydownHandler.bind(this);
   }
@@ -48,6 +49,7 @@ export default class Event {
     this._editFormComponent.setChangeDestinationHandler(this._handleChangeDestination);
     this._editFormComponent.setChangeTypeHandler(this._handleChangeType);
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);
+    this._editFormComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     if (prevEventComponent === null || prevEditFormComponent === null) {
       render(this._eventListContainer, this._eventComponent, RenderPosition.BEFOREEND);
@@ -126,6 +128,10 @@ export default class Event {
 
     this._changeData(UserAction.UPDATE_EVENT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, event, {isDateStartEqual, isDurationEqual, isPriceEqual});
     this._replaceFormToEvent();
+  }
+
+  _handleDeleteClick(event) {
+    this._changeData(UserAction.DELETE_EVENT, UpdateType.MAJOR, event);
   }
 
   _handleFavoriteClick() {

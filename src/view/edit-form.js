@@ -161,6 +161,7 @@ export default class EditForm extends SmartView {
     this._changeTypeHandler = this._changeTypeHandler.bind(this);
     this._changeDestinationHandler = this._changeDestinationHandler.bind(this);
     this._changePriceHandler = this._changePriceHandler.bind(this);
+    this._deleteClickHandler = this._deleteClickHandler.bind(this);
 
     this._setInnerHandler();
   }
@@ -202,6 +203,16 @@ export default class EditForm extends SmartView {
   setSubmitFormHandler(callback) {
     this._callback.submitForm = callback;
     this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  _deleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(EditForm.parseDataToEvent(this._data));
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._deleteClickHandler);
   }
 
   _changePriceHandler(evt) {
