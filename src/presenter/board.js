@@ -1,15 +1,13 @@
 import SiteMenuView from '../view/site-menu.js';
 import EventFiltersView from '../view/event-filters.js';
-import TripInfoView from '../view/trip-info.js';
-import RouteAndDatesView from '../view/route-and-dates.js';
-import TotalPriceView from '../view/total-price.js';
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
-import {render} from '../utils/render.js';
+import TripInfoPresenter from './trip-info.js';
+import {remove, render} from '../utils/render.js';
 import {FILTERS, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
-import {compareDuration, comparePrice, compareTimeStart} from '../utils/events';
+import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.js';
 
 export default class Board {
   constructor(boardHeaderContainer, boardMainContainer, eventsModel, destinationsModel, offersModel) {
@@ -22,7 +20,6 @@ export default class Board {
 
     this._siteMenuComponent = new SiteMenuView();
     this._eventFiltersComponent = new EventFiltersView();
-    this._tripInfoComponent = new TripInfoView();
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView(FILTERS[0]);
@@ -38,12 +35,9 @@ export default class Board {
   }
 
   init() {
-    this._routeAndDatesComponent = new RouteAndDatesView(this._getEvents());
-    this._totalPriceComponent = new TotalPriceView(this._getEvents());
-
     this._renderTrip();
 
-    render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
+    this._tripInfoPresenter = new TripInfoPresenter(this._boardHeaderContainer, this._eventsModel);
   }
 
   _getEvents() {
@@ -58,9 +52,12 @@ export default class Board {
     }
   }
 
-  _handleViewAction(actionType, updateType, update) {
+  _handleViewAction(actionType, updateType, update, {isDateStartEqual = true, isDurationEqual = true, isPriceEqual = true} = {}) {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
+        updateType = ((this._currentSortType === SortType.DAY && !isDateStartEqual) ||
+          (this._currentSortType === SortType.TIME && !isDurationEqual) ||
+          (this._currentSortType === SortType.PRICE && !isPriceEqual)) ? UpdateType.MAJOR : updateType;
         this._eventsModel.updateEvent(updateType, update);
         break;
       case UserAction.ADD_EVENT:
@@ -78,8 +75,14 @@ export default class Board {
         this._eventPresenter.get(update.id).init(update);
         break;
       case UpdateType.MINOR:
+        this._eventPresenter.get(update.id).init(update);
+        this._tripInfoPresenter.updateInfo();
         break;
       case UpdateType.MAJOR:
+        this._eventPresenter.get(update.id).init(update);
+        this._tripInfoPresenter.updateInfo();
+        this._clearBoard();
+        this._renderBoard();
         break;
     }
   }
@@ -93,9 +96,8 @@ export default class Board {
       return;
     }
 
-    this._renderTripInfo();
     this._renderEventSort();
-    this._renderEventList();
+    this._renderBoard();
   }
 
   _renderSiteMenu() {
@@ -106,21 +108,6 @@ export default class Board {
   _renderEventFilters() {
     const eventFilterElement = this._boardHeaderContainer.querySelector('.trip-controls__filters');
     render(eventFilterElement, this._eventFiltersComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderTripInfo() {
-    render(this._boardHeaderContainer, this._tripInfoComponent, RenderPosition.AFTERBEGIN);
-
-    this._renderRouteAndDates();
-    this._renderTotalPrice();
-  }
-
-  _renderRouteAndDates() {
-    render(this._tripInfoComponent, this._routeAndDatesComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderTotalPrice() {
-    render(this._tripInfoComponent, this._totalPriceComponent, RenderPosition.BEFOREEND);
   }
 
   _renderEventSort() {
@@ -134,11 +121,11 @@ export default class Board {
     }
 
     this._currentSortType = sortType;
-    this._clearEventList();
-    this._renderEventList();
+    this._clearBoard();
+    this._renderBoard();
   }
 
-  _renderEventList() {
+  _renderEvents() {
     this._getEvents().forEach((event) => this._renderEvent(event));
   }
 
@@ -152,12 +139,32 @@ export default class Board {
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.resetView());
   }
 
-  _clearEventList() {
-    this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
-    this._eventPresenter.clear();
-  }
-
   _renderNoEvent() {
     render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _clearBoard({resetSortType = false} = {}) {
+    this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
+    this._eventPresenter.clear();
+
+    remove(this._noEventComponent);
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DAY;
+    }
+  }
+
+  _renderBoard() {
+    render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
+
+    const events = this._getEvents();
+    const eventsCount = events.length;
+
+    if (eventsCount === 0) {
+      this._renderNoEvent();
+      return;
+    }
+
+    this._renderEvents();
   }
 }

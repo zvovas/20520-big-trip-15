@@ -84,7 +84,6 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
     isPhotos,
   } = data;
 
-  //TODO: Убрать прямое обращение allOffers
   const offersOfType = currentOffersOfType.slice();
   const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
   const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
@@ -208,7 +207,7 @@ export default class EditForm extends SmartView {
   _changePriceHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      price: evt.currentTarget.value,
+      price: Number(evt.currentTarget.value),
     }, true);
   }
 

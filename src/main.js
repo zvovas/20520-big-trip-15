@@ -1,12 +1,12 @@
 import BoardPresenter from './presenter/board.js';
 import EventsModel from './model/events.js';
-import OffersModel from './model/offers';
-import DestinationsModel from './model/destinations';
+import OffersModel from './model/offers.js';
+import DestinationsModel from './model/destinations.js';
 import {compareTimeStart} from './utils/events.js';
 
 import {generateEvent} from './mock/event.js';
-import {allDestinations} from './mock/destinations';
-import {allOffers} from './mock/offers';
+import {allDestinations} from './mock/destinations.js';
+import {allOffers} from './mock/offers.js';
 
 const TRIP_EVENT_COUNT = 15;
 

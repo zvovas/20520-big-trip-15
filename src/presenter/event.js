@@ -2,6 +2,7 @@ import EventView from '../view/event.js';
 import EditFormView from '../view/edit-form.js';
 import {remove, render, replace} from '../utils/render.js';
 import {RenderPosition, UpdateType, UserAction} from '../const.js';
+import {isDatesEqual, calculateDuration} from '../utils/events.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -113,9 +114,17 @@ export default class Event {
     return this._offersModel.getOffers(newType);
   }
 
-  //TODO: Изменить UpdateType
-  _handleSubmitForm(task) {
-    this._changeData(UserAction.UPDATE_EVENT, UpdateType.PATCH, task);
+  _handleSubmitForm(event) {
+    const isDateStartEqual = isDatesEqual(this._event.timeStart, event.timeStart);
+    const isDurationEqual = calculateDuration(this._event) === calculateDuration(event);
+    const isPriceEqual = this._event.price === event.price;
+    const isOffersPriceEqual = this._event.offers.reduce((sum, offer) => sum + offer.price, 0) === event.offers.reduce((sum, offer) => sum + offer.price, 0);
+    const isDestinationEqual = this._event.destination === event.destination;
+    const isDateEndEqual = isDatesEqual(this._event.timeEnd, event.timeEnd);
+
+    const isMinorUpdate = !isPriceEqual || !isOffersPriceEqual || !isDestinationEqual || !isDateEndEqual;
+
+    this._changeData(UserAction.UPDATE_EVENT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, event, {isDateStartEqual, isDurationEqual, isPriceEqual});
     this._replaceFormToEvent();
   }
 

@@ -1,9 +1,5 @@
-import AbstractObserver from '../utils/abstract-observer';
-
-// TODO: Подумать о наследовании. Нужно ли оно?
-export default class Destinations extends AbstractObserver {
+export default class Destinations {
   constructor() {
-    super();
     this._destinations = new Map();
   }
 
