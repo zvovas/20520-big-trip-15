@@ -1,18 +1,38 @@
 import EventFiltersView from '../view/event-filters.js';
 import {FilterType, RenderPosition, UpdateType} from '../const.js';
-import {render} from '../utils/render.js';
+import {render, remove, replace} from '../utils/render.js';
 
 export default class Filters {
   constructor(filterContainer, filterModel) {
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
 
-    this._filterComponent = new EventFiltersView(this._getFilters(), this._filterModel.getFilter());
+    this._filterComponent = null;
 
-    render(this._filterContainer, this._filterComponent, RenderPosition.BEFOREEND);
-
+    this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleChangeFilterType = this._handleChangeFilterType.bind(this);
+
+    this._filterModel.addObserver(this._handleModelEvent);
+  }
+
+  init() {
+    const filters = this._getFilters();
+    const prevFilterComponent = this._filterComponent;
+
+    this._filterComponent = new EventFiltersView(filters, this._filterModel.getFilter());
     this._filterComponent.setChangeFilterTypeHandler(this._handleChangeFilterType);
+
+    if (prevFilterComponent === null) {
+      render(this._filterContainer, this._filterComponent, RenderPosition.BEFOREEND);
+      return;
+    }
+
+    replace(this._filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
+  }
+
+  _handleModelEvent() {
+    this.init();
   }
 
   _getFilters() {
@@ -33,7 +53,6 @@ export default class Filters {
   }
 
   _handleChangeFilterType(type) {
-    console.log(this._filterModel);
     if (this._filterModel.getFilter() === type) {
       return;
     }

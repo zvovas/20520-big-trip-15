@@ -31,13 +31,10 @@ export default class Events extends AbstractObserver {
   }
 
   addEvent(updateType, update) {
-    const index = this._events.findIndex((item) => item.id === update.id);
-
-    if (index === -1) {
-      throw new Error('Can\'t add unexisting task');
-    }
-
-    this._events = this._events.push(update);
+    this._events = [
+      update,
+      ...this._events,
+    ];
 
     this._notify(updateType, update);
   }

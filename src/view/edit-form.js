@@ -4,10 +4,10 @@ import {humanizeDateTime} from '../utils/events.js';
 
 const BLANK_EVENT = {
   type: EVENT_TYPES[0],
-  destination: '',
+  destination: DESTINATIONS[0],
   offers: [],
-  timeStart: '',
-  timeEnd: '',
+  timeStart: Date.now(),
+  timeEnd: Date.now(),
   price: '',
 };
 
@@ -33,7 +33,7 @@ const createOfferTemplate = ({title, price}, isChecked = false) => {
   </div>`;
 };
 
-const createAllOffersTemplate = (offersOfType, offersOfData) => offersOfType.map((offerOfType) => (
+const createAllOffersTemplate = (offersOfType, offersOfData = []) => offersOfType.map((offerOfType) => (
   offersOfData.some((offerOfData) => offerOfData.title === offerOfType.title)
     ? createOfferTemplate(offerOfType, true)
     : createOfferTemplate(offerOfType, false)
@@ -71,7 +71,7 @@ const createDestinationInfoTemplate = ({description, pictures}, isDescription, i
   </section>`
 );
 
-const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
+const createEditFormTemplate = (data, currentOffersOfType, isEdit) => {
   const {
     type,
     destination,
@@ -84,10 +84,11 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
     isPhotos,
   } = data;
 
-  const offersOfType = currentOffersOfType.slice();
+  const offersOfType = currentOffersOfType ? currentOffersOfType.slice() : null;
   const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
   const destinationDatalist = DESTINATIONS.map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const editButton = (isEdit) ? '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>' : '';
+  const resetButton = (isEdit) ? '<button class="event__reset-btn" type="reset">Delete</button>' : '<button class="event__reset-btn" type="reset">Cancel</button>';
   const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers) : '';
   const informationTemplate = (isDescription || isPhotos) ? createDestinationInfoTemplate(information, isDescription, isPhotos) : '';
 
@@ -136,7 +137,7 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        ${resetButton}
         ${editButton}
       </header>
       <section class="event__details">
@@ -149,9 +150,9 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit = false) => {
 };
 
 export default class EditForm extends SmartView {
-  constructor(event = BLANK_EVENT, destinationInfo, currentOffersOfType, isEdit) {
+  constructor(event = BLANK_EVENT, destinationInfo, currentOffersOfType, isEdit = false) {
     super();
-    this._data = EditForm.parseEventToData(event);
+    this._data = EditForm.parseEventToData(event, destinationInfo);
     this._destinationInfo = destinationInfo;
     this._currentOffersOfType = currentOffersOfType;
     this._isEdit = isEdit;
@@ -270,9 +271,12 @@ export default class EditForm extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandler();
-    this.setCloseClickHandler(this._callback.closeClick);
+    if (this._isEdit) {
+      this.setCloseClickHandler(this._callback.closeClick);
+    }
     this.setSubmitFormHandler(this._callback.submitForm);
     this.setChangeDestinationHandler(this._callback.changeDestination);
+    this.setChangeTypeHandler(this._callback.changeType);
   }
 
   reset(event) {

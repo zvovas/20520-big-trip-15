@@ -4,7 +4,8 @@ import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
 import TripInfoPresenter from './trip-info.js';
-import {remove, render} from '../utils/render.js';
+import EventNewPresenter from './event-new.js';
+import {remove, render, replace} from '../utils/render.js';
 import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
 import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.js';
 import {filter} from '../utils/filter.js';
@@ -35,6 +36,8 @@ export default class Board {
 
     this._eventsModel.addObserver(this._handleModelEvent);
     this._filtersModel.addObserver(this._handleModelEvent);
+
+    this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._handleViewAction, this._destinationsModel, this._offersModel);
   }
 
   init() {
@@ -42,6 +45,12 @@ export default class Board {
 
     this._tripInfoPresenter = new TripInfoPresenter(this._boardHeaderContainer, this._eventsModel);
     this._tripInfoPresenter.init();
+  }
+
+  createEvent() {
+    this._currentSortType = SortType.DAY;
+    this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
+    this._eventNewPresenter.init();
   }
 
   _getEvents() {
@@ -90,6 +99,10 @@ export default class Board {
         this._clearBoard();
         this._renderBoard();
         break;
+      case UpdateType.RESET:
+        this._tripInfoPresenter.init();
+        this._clearBoard({resetSortType: true});
+        this._renderBoard();
     }
   }
 
@@ -124,6 +137,7 @@ export default class Board {
   }
 
   _handleModeChange() {
+    this._eventNewPresenter.destroy();
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.resetView());
   }
 
@@ -133,6 +147,7 @@ export default class Board {
   }
 
   _clearBoard({resetSortType = false} = {}) {
+    this._eventNewPresenter.destroy();
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
     this._eventPresenter.clear();
 
@@ -142,6 +157,10 @@ export default class Board {
 
     if (resetSortType) {
       this._currentSortType = SortType.DAY;
+      const prevSortComponent = this._eventSortComponent;
+      this._eventSortComponent = new EventSortView();
+      replace(this._eventSortComponent, prevSortComponent);
+      remove(prevSortComponent);
     }
   }
 

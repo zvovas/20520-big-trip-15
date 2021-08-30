@@ -10,7 +10,7 @@ import {generateEvent} from './mock/event.js';
 import {allDestinations} from './mock/destinations.js';
 import {allOffers} from './mock/offers.js';
 
-const TRIP_EVENT_COUNT = 2;
+const TRIP_EVENT_COUNT = 15;
 
 const destinationsModel = new DestinationsModel();
 destinationsModel.setDestinations(allDestinations);
@@ -31,6 +31,12 @@ const tripFiltersElement = tripMainElement.querySelector('.trip-controls__filter
 const pageMainElement = document.querySelector('.page-main');
 const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
-new FiltersPresenter(tripFiltersElement, filtersModel);
+const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel);
 const tripPresenter = new BoardPresenter(tripMainElement, tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
 tripPresenter.init();
+filtersPresenter.init();
+
+document.querySelector('.trip-main__event-add-btn').addEventListener('click', (evt) => {
+  evt.preventDefault();
+  tripPresenter.createEvent();
+});
