@@ -1,6 +1,8 @@
+import he from 'he';
 import SmartView from './smart.js';
 import {DESTINATIONS, EVENT_TYPES} from '../const.js';
 import {humanizeDateTime} from '../utils/events.js';
+
 
 const BLANK_EVENT = {
   type: EVENT_TYPES[0],
@@ -19,7 +21,7 @@ const createEventTypeInputTemplate = (type, isCurrentType) => {
   </div>`;
 };
 
-const createDestinationOptionTemplate = (destination) => `<option value="${destination}"></option>`;
+const createDestinationOptionTemplate = (destination) => `<option value="${he.encode(destination)}"></option>`;
 
 const createOfferTemplate = ({title, price}, isChecked = false) => {
   const checkedStatus = (isChecked) ? 'checked' : '';
@@ -114,7 +116,7 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination)}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${destinationDatalist}
           </datalist>
@@ -133,7 +135,7 @@ const createEditFormTemplate = (data, currentOffersOfType, isEdit) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -227,13 +229,6 @@ export default class EditForm extends SmartView {
     evt.preventDefault();
 
     const inputDestination = evt.currentTarget;
-
-    if (!DESTINATIONS.some((destination) => destination === inputDestination.value)) {
-      this.updateData({
-        destination: inputDestination.value,
-      }, true);
-      return;
-    }
 
     this._destinationInfo = this._callback.changeDestination(inputDestination.value);
     this.updateData({
