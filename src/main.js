@@ -10,7 +10,7 @@ import {generateEvent} from './mock/event.js';
 import {allDestinations} from './mock/destinations.js';
 import {allOffers} from './mock/offers.js';
 
-const TRIP_EVENT_COUNT = 15;
+const TRIP_EVENT_COUNT = 2;
 
 const destinationsModel = new DestinationsModel();
 destinationsModel.setDestinations(allDestinations);

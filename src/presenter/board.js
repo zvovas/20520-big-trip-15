@@ -22,8 +22,10 @@ export default class Board {
     this._siteMenuComponent = new SiteMenuView();
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
-    this._noEventComponent = new NoEventView(FilterType.EVERYTHING);
+    this._filterType = FilterType.EVERYTHING;
     this._currentSortType = SortType.DAY;
+
+    this._noEventComponent = null;
 
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
@@ -39,12 +41,13 @@ export default class Board {
     this._renderBoard();
 
     this._tripInfoPresenter = new TripInfoPresenter(this._boardHeaderContainer, this._eventsModel);
+    this._tripInfoPresenter.init();
   }
 
   _getEvents() {
-    const filterType = this._filtersModel.getFilter();
+    this._filterType = this._filtersModel.getFilter();
     const events = this._eventsModel.getEvents();
-    const filteredEvents = filter[filterType](events);
+    const filteredEvents = filter[this._filterType](events);
 
     switch (this._currentSortType) {
       case SortType.DAY:
@@ -80,10 +83,10 @@ export default class Board {
         break;
       case UpdateType.MINOR:
         this._eventPresenter.get(update.id).init(update);
-        this._tripInfoPresenter.updateInfo();
+        this._tripInfoPresenter.init();
         break;
       case UpdateType.MAJOR:
-        this._tripInfoPresenter.updateInfo();
+        this._tripInfoPresenter.init();
         this._clearBoard();
         this._renderBoard();
         break;
@@ -125,6 +128,7 @@ export default class Board {
   }
 
   _renderNoEvent() {
+    this._noEventComponent = new NoEventView(this._filterType);
     render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
   }
 
@@ -132,7 +136,9 @@ export default class Board {
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
     this._eventPresenter.clear();
 
-    remove(this._noEventComponent);
+    if(this._noEventComponent) {
+      remove(this._noEventComponent);
+    }
 
     if (resetSortType) {
       this._currentSortType = SortType.DAY;

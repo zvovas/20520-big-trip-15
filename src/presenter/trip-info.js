@@ -1,7 +1,7 @@
 import TripInfoView from '../view/trip-info.js';
 import RouteAndDatesView from '../view/route-and-dates.js';
 import TotalPriceView from '../view/total-price.js';
-import {render, replace} from '../utils/render.js';
+import {render, replace, remove} from '../utils/render.js';
 import {RenderPosition} from '../const.js';
 
 export default class TripInfo {
@@ -10,15 +10,28 @@ export default class TripInfo {
     this._eventsModel = eventsModel;
 
     this._tripInfoComponent = new TripInfoView();
-    this._routeAndDatesComponent = new RouteAndDatesView(this._eventsModel.getEvents());
-    this._totalPriceComponent = new TotalPriceView(this._eventsModel.getEvents());
+
+    this._routeAndDatesComponent = null;
+    this._totalPriceComponent = null;
 
     render(this._boardHeaderContainer, this._tripInfoComponent, RenderPosition.AFTERBEGIN);
-    render(this._tripInfoComponent, this._routeAndDatesComponent, RenderPosition.BEFOREEND);
-    render(this._tripInfoComponent, this._totalPriceComponent, RenderPosition.BEFOREEND);
   }
 
-  updateInfo() {
+  init() {
+    if (this._eventsModel.getEvents().length === 0) {
+      remove(this._routeAndDatesComponent);
+      remove(this._totalPriceComponent);
+      return;
+    }
+
+    if (!this._routeAndDatesComponent && !this._totalPriceComponent) {
+      this._routeAndDatesComponent = new RouteAndDatesView(this._eventsModel.getEvents());
+      this._totalPriceComponent = new TotalPriceView(this._eventsModel.getEvents());
+    }
+
+    render(this._tripInfoComponent, this._routeAndDatesComponent, RenderPosition.BEFOREEND);
+    render(this._tripInfoComponent, this._totalPriceComponent, RenderPosition.BEFOREEND);
+
     const prevRouteAndDatesComponent = this._routeAndDatesComponent;
     const prevPriceComponent = this._totalPriceComponent;
 
