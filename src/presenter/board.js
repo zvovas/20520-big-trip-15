@@ -1,5 +1,4 @@
 import SiteMenuView from '../view/site-menu.js';
-import EventFiltersView from '../view/event-filters.js';
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
@@ -8,18 +7,19 @@ import TripInfoPresenter from './trip-info.js';
 import {remove, render} from '../utils/render.js';
 import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
 import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.js';
+import {filter} from '../utils/filter.js';
 
 export default class Board {
-  constructor(boardHeaderContainer, boardMainContainer, eventsModel, destinationsModel, offersModel) {
+  constructor(boardHeaderContainer, boardMainContainer, eventsModel, filtersModel, destinationsModel, offersModel) {
     this._boardHeaderContainer = boardHeaderContainer;
     this._boardMainContainer = boardMainContainer;
     this._eventsModel = eventsModel;
+    this._filtersModel = filtersModel;
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
     this._eventPresenter = new Map();
 
     this._siteMenuComponent = new SiteMenuView();
-    this._eventFiltersComponent = new EventFiltersView();
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
     this._noEventComponent = new NoEventView(FilterType.EVERYTHING);
@@ -32,23 +32,27 @@ export default class Board {
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
     this._eventsModel.addObserver(this._handleModelEvent);
+    this._filtersModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    this._renderTrip();
+    this._renderBoard();
 
     this._tripInfoPresenter = new TripInfoPresenter(this._boardHeaderContainer, this._eventsModel);
   }
 
   _getEvents() {
+    const filterType = this._filtersModel.getFilter();
     const events = this._eventsModel.getEvents();
+    const filteredEvents = filter[filterType](events);
+
     switch (this._currentSortType) {
       case SortType.DAY:
-        return events.sort(compareTimeStart);
+        return filteredEvents.sort(compareTimeStart);
       case SortType.TIME:
-        return events.slice().sort(compareDuration);
+        return filteredEvents.sort(compareDuration);
       case SortType.PRICE:
-        return events.slice().sort(comparePrice);
+        return filteredEvents.sort(comparePrice);
     }
   }
 
@@ -79,7 +83,6 @@ export default class Board {
         this._tripInfoPresenter.updateInfo();
         break;
       case UpdateType.MAJOR:
-        this._eventPresenter.get(update.id).init(update);
         this._tripInfoPresenter.updateInfo();
         this._clearBoard();
         this._renderBoard();
@@ -87,31 +90,13 @@ export default class Board {
     }
   }
 
-  _renderTrip() {
-    this._renderSiteMenu();
-    this._renderEventFilters();
-
-    if (this._getEvents().length === 0) {
-      this._renderNoEvent();
-      return;
-    }
-
-    this._renderEventSort();
-    this._renderBoard();
-  }
-
   _renderSiteMenu() {
     const siteMenuElement = this._boardHeaderContainer.querySelector('.trip-controls__navigation');
     render(siteMenuElement, this._siteMenuComponent, RenderPosition.BEFOREEND);
   }
 
-  _renderEventFilters() {
-    const eventFilterElement = this._boardHeaderContainer.querySelector('.trip-controls__filters');
-    render(eventFilterElement, this._eventFiltersComponent, RenderPosition.BEFOREEND);
-  }
-
   _renderEventSort() {
-    render(this._boardMainContainer, this._eventSortComponent, RenderPosition.BEFOREEND);
+    render(this._boardMainContainer, this._eventSortComponent, RenderPosition.AFTERBEGIN);
     this._eventSortComponent.setChangeSortTypeHandler(this._handleChangeSortType);
   }
 
@@ -156,6 +141,8 @@ export default class Board {
 
   _renderBoard() {
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
+    this._renderSiteMenu();
+    this._renderEventSort();
 
     const events = this._getEvents();
     const eventsCount = events.length;

@@ -13,7 +13,7 @@ const generateTimeStart = () => {
   const maxDaysGap = 7;
   const daysGap = getRandomInteger(-maxDaysGap, maxDaysGap);
 
-  return dayjs().add(daysGap, 'day').toDate();
+  return dayjs().add(daysGap, 'day').subtract(getRandomInteger(30, 2160), 'minute').toDate();
 };
 
 export const generateEvent = () => {
