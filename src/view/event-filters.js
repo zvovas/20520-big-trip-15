@@ -1,5 +1,9 @@
 import AbstractView from './abstract.js';
 
+const createEventFilterTemplate = () => {
+
+};
+
 const createEventFiltersTemplate = () => (
   `<form class="trip-filters" action="#" method="get">
     <div class="trip-filters__filter">
@@ -22,7 +26,12 @@ const createEventFiltersTemplate = () => (
 );
 
 export default class EventFilters extends AbstractView {
+  constructor(filterItems, currentFilterType) {
+    super();
+    this._filterItems = filterItems;
+    this.currentFilterType = currentFilterType;
+  }
   getTemplate() {
-    return createEventFiltersTemplate();
+    return createEventFiltersTemplate(this._filterItems, this.currentFilterType);
   }
 }

@@ -1,6 +1,7 @@
 import BoardPresenter from './presenter/board.js';
 import EventsModel from './model/events.js';
 import OffersModel from './model/offers.js';
+import FilterModel from './model/filter.js';
 import DestinationsModel from './model/destinations.js';
 import {compareTimeStart} from './utils/events.js';
 
@@ -19,6 +20,8 @@ offersModel.setOffers(allOffers);
 const events = Array(TRIP_EVENT_COUNT).fill().map(generateEvent).sort(compareTimeStart);
 const eventsModel = new EventsModel();
 eventsModel.setEvents(events);
+
+const filterModel = new FilterModel();
 
 const pageHeaderElement = document.querySelector('.page-header');
 const tripMainElement = pageHeaderElement.querySelector('.trip-main');

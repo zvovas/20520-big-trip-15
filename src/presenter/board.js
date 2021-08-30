@@ -6,7 +6,7 @@ import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
 import TripInfoPresenter from './trip-info.js';
 import {remove, render} from '../utils/render.js';
-import {FILTERS, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
+import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
 import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.js';
 
 export default class Board {
@@ -22,7 +22,7 @@ export default class Board {
     this._eventFiltersComponent = new EventFiltersView();
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
-    this._noEventComponent = new NoEventView(FILTERS[0]);
+    this._noEventComponent = new NoEventView(FilterType.EVERYTHING);
     this._currentSortType = SortType.DAY;
 
     this._handleViewAction = this._handleViewAction.bind(this);
