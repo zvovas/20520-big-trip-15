@@ -1,6 +1,10 @@
 export const EVENT_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 export const DESTINATIONS = ['Amsterdam', 'Chamonix', 'Geneva', 'Moscow', 'Saint-Petersburg'];
-export const FILTERS = ['Everything', 'Future', 'Past'];
+export const FilterType = {
+  EVERYTHING: 'everything',
+  PAST: 'past',
+  FUTURE: 'future',
+};
 export const NoEventMessage = {
   EVERYTHING: 'Click New Event to create your first event',
   PAST: 'There are no past events now',
@@ -15,4 +19,17 @@ export const SortType = {
   DAY: 'day',
   TIME: 'time',
   PRICE: 'price',
+};
+
+export const UserAction = {
+  UPDATE_EVENT: 'UPDATE_EVENT',
+  ADD_EVENT: 'ADD_EVENT',
+  DELETE_EVENT: 'DELETE_EVENT',
+};
+
+export const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+  RESET: 'RESET',
 };

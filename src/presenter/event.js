@@ -1,7 +1,8 @@
 import EventView from '../view/event.js';
 import EditFormView from '../view/edit-form.js';
 import {remove, render, replace} from '../utils/render.js';
-import {RenderPosition} from '../const.js';
+import {RenderPosition, UpdateType, UserAction} from '../const.js';
+import {isDatesEqual, calculateDuration} from '../utils/events.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -9,8 +10,10 @@ const Mode = {
 };
 
 export default class Event {
-  constructor(eventListContainer, changeData, changeMode) {
+  constructor(eventListContainer, destinationsModel, offersModel, changeData, changeMode) {
     this._eventListContainer = eventListContainer;
+    this._destinationsModel = destinationsModel;
+    this._offersModel = offersModel;
     this._changeData = changeData;
     this._changeMode = changeMode;
 
@@ -20,7 +23,10 @@ export default class Event {
 
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleCloseClick = this._handleCloseClick.bind(this);
+    this._handleChangeDestination = this._handleChangeDestination.bind(this);
+    this._handleChangeType = this._handleChangeType.bind(this);
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
     this._escKeydownHandler = this._escKeydownHandler.bind(this);
   }
@@ -31,13 +37,19 @@ export default class Event {
     const prevEventComponent = this._eventComponent;
     const prevEditFormComponent = this._editFormComponent;
 
+    const destinationInfo = this._destinationsModel.getDestination(this._event.destination);
+    const currentOffers = this._offersModel.getOffers(this._event.type);
+
     this._eventComponent = new EventView(event);
-    this._editFormComponent = new EditFormView(event, true);
+    this._editFormComponent = new EditFormView(event, destinationInfo, currentOffers, true);
 
     this._eventComponent.setEditClickHandler(this._handleEditClick);
     this._eventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._editFormComponent.setCloseClickHandler(this._handleCloseClick);
+    this._editFormComponent.setChangeDestinationHandler(this._handleChangeDestination);
+    this._editFormComponent.setChangeTypeHandler(this._handleChangeType);
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);
+    this._editFormComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     if (prevEventComponent === null || prevEditFormComponent === null) {
       render(this._eventListContainer, this._eventComponent, RenderPosition.BEFOREEND);
@@ -96,13 +108,36 @@ export default class Event {
     this._replaceFormToEvent();
   }
 
-  _handleSubmitForm(task) {
-    this._changeData(task);
+  _handleChangeDestination(newDestination) {
+    return this._destinationsModel.getDestination(newDestination);
+  }
+
+  _handleChangeType(newType) {
+    return this._offersModel.getOffers(newType);
+  }
+
+  _handleSubmitForm(event) {
+    const isDateStartEqual = isDatesEqual(this._event.timeStart, event.timeStart);
+    const isDurationEqual = calculateDuration(this._event) === calculateDuration(event);
+    const isPriceEqual = this._event.price === event.price;
+    const isOffersPriceEqual = this._event.offers.reduce((sum, offer) => sum + offer.price, 0) === event.offers.reduce((sum, offer) => sum + offer.price, 0);
+    const isDestinationEqual = this._event.destination === event.destination;
+    const isDateEndEqual = isDatesEqual(this._event.timeEnd, event.timeEnd);
+
+    const isMinorUpdate = !isPriceEqual || !isOffersPriceEqual || !isDestinationEqual || !isDateEndEqual;
+
+    this._changeData(UserAction.UPDATE_EVENT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, event, {isDateStartEqual, isDurationEqual, isPriceEqual});
     this._replaceFormToEvent();
+  }
+
+  _handleDeleteClick(event) {
+    this._changeData(UserAction.DELETE_EVENT, UpdateType.MAJOR, event);
   }
 
   _handleFavoriteClick() {
     this._changeData(
+      UserAction.UPDATE_EVENT,
+      UpdateType.PATCH,
       Object.assign(
         {},
         this._event,
