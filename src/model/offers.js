@@ -3,11 +3,16 @@ export default class Offers {
     this._offers = new Map();
   }
 
-  setOffers(offers) {
-    offers.forEach((offer) => this._offers.set(offer.type, offer));
+  _findOffers(eventType, allOffers) {
+    const typeOffers = allOffers.find((offers) => offers.type === eventType);
+    return typeOffers ? typeOffers.offers : null;
   }
 
-  getOffers(type) {
-    return this._offers.get(type);
+  setOffers(eventTypes, allOffers) {
+    eventTypes.forEach((eventType) => this._offers.set(eventType, this._findOffers(eventType, allOffers)));
+  }
+
+  getOffers() {
+    return this._offers;
   }
 }

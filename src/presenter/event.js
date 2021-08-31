@@ -23,8 +23,6 @@ export default class Event {
 
     this._handleEditClick = this._handleEditClick.bind(this);
     this._handleCloseClick = this._handleCloseClick.bind(this);
-    this._handleChangeDestination = this._handleChangeDestination.bind(this);
-    this._handleChangeType = this._handleChangeType.bind(this);
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
@@ -37,17 +35,12 @@ export default class Event {
     const prevEventComponent = this._eventComponent;
     const prevEditFormComponent = this._editFormComponent;
 
-    const destinationInfo = this._destinationsModel.getDestination(this._event.destination);
-    const currentOffers = this._offersModel.getOffers(this._event.type);
-
     this._eventComponent = new EventView(event);
-    this._editFormComponent = new EditFormView(event, destinationInfo, currentOffers, true);
+    this._editFormComponent = new EditFormView(event, this._destinationsModel.getDestinations(), this._offersModel.getOffers(), true);
 
     this._eventComponent.setEditClickHandler(this._handleEditClick);
     this._eventComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._editFormComponent.setCloseClickHandler(this._handleCloseClick);
-    this._editFormComponent.setChangeDestinationHandler(this._handleChangeDestination);
-    this._editFormComponent.setChangeTypeHandler(this._handleChangeType);
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);
     this._editFormComponent.setDeleteClickHandler(this._handleDeleteClick);
 
@@ -106,14 +99,6 @@ export default class Event {
 
   _handleCloseClick() {
     this._replaceFormToEvent();
-  }
-
-  _handleChangeDestination(newDestination) {
-    return this._destinationsModel.getDestination(newDestination);
-  }
-
-  _handleChangeType(newType) {
-    return this._offersModel.getOffers(newType);
   }
 
   _handleSubmitForm(event) {

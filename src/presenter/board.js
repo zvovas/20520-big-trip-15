@@ -1,9 +1,7 @@
-import SiteMenuView from '../view/site-menu.js';
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import EventPresenter from './event.js';
-import TripInfoPresenter from './trip-info.js';
 import EventNewPresenter from './event-new.js';
 import {remove, render, replace} from '../utils/render.js';
 import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
@@ -11,8 +9,7 @@ import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.j
 import {filter} from '../utils/filter.js';
 
 export default class Board {
-  constructor(boardHeaderContainer, boardMainContainer, eventsModel, filtersModel, destinationsModel, offersModel) {
-    this._boardHeaderContainer = boardHeaderContainer;
+  constructor(boardMainContainer, eventsModel, filtersModel, destinationsModel, offersModel) {
     this._boardMainContainer = boardMainContainer;
     this._eventsModel = eventsModel;
     this._filtersModel = filtersModel;
@@ -20,7 +17,6 @@ export default class Board {
     this._offersModel = offersModel;
     this._eventPresenter = new Map();
 
-    this._siteMenuComponent = new SiteMenuView();
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
     this._filterType = FilterType.EVERYTHING;
@@ -37,14 +33,11 @@ export default class Board {
     this._eventsModel.addObserver(this._handleModelEvent);
     this._filtersModel.addObserver(this._handleModelEvent);
 
-    this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._handleViewAction, this._destinationsModel, this._offersModel);
+    this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._destinationsModel, this._offersModel, this._handleViewAction);
   }
 
   init() {
     this._renderBoard();
-
-    this._tripInfoPresenter = new TripInfoPresenter(this._boardHeaderContainer, this._eventsModel);
-    this._tripInfoPresenter.init();
   }
 
   createEvent() {
@@ -92,23 +85,15 @@ export default class Board {
         break;
       case UpdateType.MINOR:
         this._eventPresenter.get(update.id).init(update);
-        this._tripInfoPresenter.init();
         break;
       case UpdateType.MAJOR:
-        this._tripInfoPresenter.init();
         this._clearBoard();
         this._renderBoard();
         break;
       case UpdateType.RESET:
-        this._tripInfoPresenter.init();
         this._clearBoard({resetSortType: true});
         this._renderBoard();
     }
-  }
-
-  _renderSiteMenu() {
-    const siteMenuElement = this._boardHeaderContainer.querySelector('.trip-controls__navigation');
-    render(siteMenuElement, this._siteMenuComponent, RenderPosition.BEFOREEND);
   }
 
   _renderEventSort() {
@@ -166,13 +151,9 @@ export default class Board {
 
   _renderBoard() {
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
-    this._renderSiteMenu();
     this._renderEventSort();
 
-    const events = this._getEvents();
-    const eventsCount = events.length;
-
-    if (eventsCount === 0) {
+    if (this._getEvents().length === 0) {
       this._renderNoEvent();
       return;
     }

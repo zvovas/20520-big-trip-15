@@ -3,11 +3,20 @@ export default class Destinations {
     this._destinations = new Map();
   }
 
-  setDestinations(destinations) {
-    destinations.forEach((destination) => this._destinations.set(destination.name, destination));
+  _findDestinationInfo(destination, destinationsInfo) {
+    const information = destinationsInfo.find((destinationInfo) => destinationInfo.name === destination);
+    return information ? Object.assign({},
+      {
+        description: information.description,
+        pictures: information.pictures,
+      }) : null;
   }
 
-  getDestination(name) {
-    return this._destinations.get(name);
+  setDestinations(destinations, destinationsInfo) {
+    destinations.forEach((destination) => this._destinations.set(destination, this._findDestinationInfo(destination, destinationsInfo)));
+  }
+
+  getDestinations() {
+    return this._destinations;
   }
 }
