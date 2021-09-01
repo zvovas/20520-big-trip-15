@@ -12,20 +12,24 @@ export default class EventNew {
     this._offersModel = offersModel;
 
     this._editFormComponent = null;
+    this._destroyCallback = null;
 
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init() {
+  init(callback) {
+    this._destroyCallback = callback;
+
     if (this._editFormComponent !== null) {
       return;
     }
 
+    console.log(this._destroyCallback);
     const BLANK_EVENT = {
       type: [...this._offersModel.getOffers().keys()][0],
-      destination: [...this._destinationsModel.getDestinations().keys()][0],
+      destination: '',
       offers: [],
       timeStart: dayjs().toDate(),
       timeEnd: dayjs().toDate(),
@@ -44,6 +48,10 @@ export default class EventNew {
   destroy() {
     if (this._editFormComponent === null) {
       return;
+    }
+
+    if (this._destroyCallback !== null) {
+      this._destroyCallback();
     }
 
     remove(this._editFormComponent);

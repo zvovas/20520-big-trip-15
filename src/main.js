@@ -35,15 +35,12 @@ const tripFiltersElement = tripMainElement.querySelector('.trip-controls__filter
 const pageMainElement = document.querySelector('.page-main');
 const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
-new SiteMenuPresenter(siteMenuContainer);
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel);
 const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
+new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, filtersModel);
 tripInfoPresenter.init();
 tripPresenter.init();
 filtersPresenter.init();
 
-document.querySelector('.trip-main__event-add-btn').addEventListener('click', (evt) => {
-  evt.preventDefault();
-  tripPresenter.createEvent();
-});
+

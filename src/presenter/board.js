@@ -30,20 +30,29 @@ export default class Board {
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._eventsModel.addObserver(this._handleModelEvent);
-    this._filtersModel.addObserver(this._handleModelEvent);
-
     this._eventNewPresenter = new EventNewPresenter(this._eventListComponent, this._destinationsModel, this._offersModel, this._handleViewAction);
   }
 
   init() {
     this._renderBoard();
+
+    this._eventsModel.addObserver(this._handleModelEvent);
+    this._filtersModel.addObserver(this._handleModelEvent);
   }
 
-  createEvent() {
-    this._currentSortType = SortType.DAY;
-    this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
-    this._eventNewPresenter.init();
+  destroy() {
+    this._clearBoard({resetSortType: true});
+
+    remove(this._eventListComponent);
+
+    this._eventsModel.deleteObserver(this._handleModelEvent);
+    this._filtersModel.deleteObserver(this._handleModelEvent);
+  }
+
+  createEvent(callback) {
+    // this._currentSortType = SortType.DAY;
+    // this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
+    this._eventNewPresenter.init(callback);
   }
 
   _getEvents() {

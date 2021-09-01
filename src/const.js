@@ -33,3 +33,9 @@ export const UpdateType = {
   MAJOR: 'MAJOR',
   RESET: 'RESET',
 };
+
+export const MenuItem = {
+  ADD_NEW_EVENT: 'ADD_NEW_EVENT',
+  TABLE: 'TABLE',
+  STATS: 'STATS',
+};
