@@ -1,6 +1,8 @@
 import he from 'he';
 import SmartView from './smart.js';
 import {humanizeDateTime} from '../utils/events.js';
+import flatpickr from 'flatpickr';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const createEventTypeInputTemplate = (type, isCurrentType) => {
   const checkedStatus = isCurrentType ? 'checked' : '';
@@ -150,14 +152,20 @@ export default class EditForm extends SmartView {
     this._data = EditForm.parseEventToData(event, this._destinationsInfo);
     this._isEdit = isEdit;
 
+    this._datepickerStart = null;
+    this._datepickerEnd = null;
+
     this._closeClickHandler = this._closeClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._changeTypeHandler = this._changeTypeHandler.bind(this);
     this._changeDestinationHandler = this._changeDestinationHandler.bind(this);
+    this._timeStartChangeHandler = this._timeStartChangeHandler.bind(this);
+    this._timeEndChangeHandler = this._timeEndChangeHandler.bind(this);
     this._changePriceHandler = this._changePriceHandler.bind(this);
     this._deleteClickHandler = this._deleteClickHandler.bind(this);
 
     this._setInnerHandler();
+    this._setDatepicker();
   }
 
   getTemplate() {
@@ -233,6 +241,18 @@ export default class EditForm extends SmartView {
     );
   }
 
+  _timeStartChangeHandler([userDate]) {
+    this.updateData({
+      timeStart: userDate,
+    });
+  }
+
+  _timeEndChangeHandler([userDate]) {
+    this.updateData({
+      timeEnd: userDate,
+    });
+  }
+
   _setInnerHandler() {
     this.getElement().querySelector('.event__input--destination').addEventListener('change', this._changeDestinationHandler);
     this.getElement().querySelector('.event__type-group').addEventListener('change', this._changeTypeHandler);
@@ -241,10 +261,40 @@ export default class EditForm extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandler();
+    this._setDatepicker();
     if (this._isEdit) {
       this.setCloseClickHandler(this._callback.closeClick);
     }
     this.setSubmitFormHandler(this._callback.submitForm);
+  }
+
+  _setDatepicker() {
+    if(this._datepickerStart && this._datepickerEnd) {
+      this._datepickerStart.destroy();
+      this._datepickerStart = null;
+      this._datepickerEnd.destroy();
+      this._datepickerEnd = null;
+    }
+
+    this._datepickerStart = flatpickr(
+      this.getElement().querySelector('[name="event-start-time"]'),
+      {
+        dateFormat: 'd/m/Y H:i',
+        enableTime: true,
+        defaultDate: this._data.timeStart,
+        onChange: this._timeStartChangeHandler,
+      },
+    );
+
+    this._datepickerEnd = flatpickr(
+      this.getElement().querySelector('[name="event-end-time"]'),
+      {
+        dateFormat: 'd/m/Y H:i',
+        enableTime: true,
+        defaultDate: this._data.timeEnd,
+        onChange: this._timeEndChangeHandler,
+      },
+    );
   }
 
   reset(event) {
