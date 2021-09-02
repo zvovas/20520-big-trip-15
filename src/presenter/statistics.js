@@ -3,9 +3,10 @@ import {remove, render} from '../utils/render.js';
 import {RenderPosition} from '../const.js';
 
 export default class Statistics {
-  constructor(statisticsContainer, eventsModel) {
+  constructor(statisticsContainer, eventsModel, pageBodyContainerElements) {
     this._statisticsContainer = statisticsContainer;
     this._eventsModel = eventsModel;
+    this._pageBodyContainerElements = pageBodyContainerElements;
     this._statisticsComponent = null;
   }
 
@@ -15,6 +16,8 @@ export default class Statistics {
     }
 
     render(this._statisticsContainer, this._statisticsComponent, RenderPosition.BEFOREEND);
+
+    this._pageBodyContainerElements.forEach((element) => element.classList.remove('page-body__container--no-statistics'));
   }
 
   destroy() {
@@ -22,5 +25,6 @@ export default class Statistics {
       remove(this._statisticsComponent);
       this._statisticsComponent = null;
     }
+    this._pageBodyContainerElements.forEach((element) => element.classList.add('page-body__container--no-statistics'));
   }
 }

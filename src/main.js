@@ -28,18 +28,19 @@ eventsModel.setEvents(events);
 
 const filtersModel = new FiltersModel();
 
-const pageHeaderElement = document.querySelector('.page-header');
-const tripMainElement = pageHeaderElement.querySelector('.trip-main');
+const pageBodyContainerElements = document.querySelectorAll('.page-body__container');
+
+const tripMainElement = pageBodyContainerElements[0].querySelector('.trip-main');
 const siteMenuContainer = tripMainElement.querySelector('.trip-controls__navigation');
 const tripFiltersElement = tripMainElement.querySelector('.trip-controls__filters');
 
-const pageMainElement = document.querySelector('.page-main .page-body__container');
+const pageMainElement = pageBodyContainerElements[1];
 const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
 const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
-const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel);
+const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel, pageBodyContainerElements);
 new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, statisticsPresenter, filtersModel);
 tripInfoPresenter.init();
 tripPresenter.init();

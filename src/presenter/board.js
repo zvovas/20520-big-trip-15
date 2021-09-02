@@ -43,6 +43,7 @@ export default class Board {
   destroy() {
     this._clearBoard({resetSortType: true});
 
+    remove(this._eventSortComponent);
     remove(this._eventListComponent);
 
     this._eventsModel.deleteObserver(this._handleModelEvent);

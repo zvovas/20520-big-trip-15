@@ -32,6 +32,7 @@ export default class SiteMenu {
     switch (menuItem) {
       case MenuItem.ADD_NEW_EVENT:
         this._statisticsPresenter.destroy();
+        this._boardPresenter.destroy();
         this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
         this._boardPresenter.createEvent(this._handleNewEventFormClose);
         this._boardPresenter.init();
