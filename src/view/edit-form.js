@@ -268,14 +268,21 @@ export default class EditForm extends SmartView {
     this.setSubmitFormHandler(this._callback.submitForm);
   }
 
-  _setDatepicker() {
-    if(this._datepickerStart && this._datepickerEnd) {
+  removeElement() {
+    super.removeElement();
+    this._resetDatepicker();
+  }
+
+  _resetDatepicker() {
+    if (this._datepickerStart && this._datepickerEnd) {
       this._datepickerStart.destroy();
       this._datepickerStart = null;
       this._datepickerEnd.destroy();
       this._datepickerEnd = null;
     }
+  }
 
+  _setDatepicker() {
     this._datepickerStart = flatpickr(
       this.getElement().querySelector('[name="event-start-time"]'),
       {
