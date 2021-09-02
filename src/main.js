@@ -36,7 +36,7 @@ const pageMainElement = document.querySelector('.page-main');
 const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
-const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel);
+const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
 const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
 new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, filtersModel);
 tripInfoPresenter.init();
