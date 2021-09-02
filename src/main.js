@@ -1,6 +1,7 @@
 import SiteMenuPresenter from './presenter/site-menu.js';
 import FiltersPresenter from './presenter/filters.js';
 import BoardPresenter from './presenter/board.js';
+import StatisticsPresenter from './presenter/statistics.js';
 import EventsModel from './model/events.js';
 import OffersModel from './model/offers.js';
 import FiltersModel from './model/filters.js';
@@ -32,13 +33,14 @@ const tripMainElement = pageHeaderElement.querySelector('.trip-main');
 const siteMenuContainer = tripMainElement.querySelector('.trip-controls__navigation');
 const tripFiltersElement = tripMainElement.querySelector('.trip-controls__filters');
 
-const pageMainElement = document.querySelector('.page-main');
+const pageMainElement = document.querySelector('.page-main .page-body__container');
 const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
 const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
-new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, filtersModel);
+const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel);
+new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, statisticsPresenter, filtersModel);
 tripInfoPresenter.init();
 tripPresenter.init();
 filtersPresenter.init();

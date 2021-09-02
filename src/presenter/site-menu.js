@@ -4,10 +4,11 @@ import {render} from '../utils/render.js';
 import {FilterType, MenuItem, RenderPosition, UpdateType} from '../const.js';
 
 export default class SiteMenu {
-  constructor(newButtonContainer, siteMenuContainer, boardPresenter, filtersModel) {
+  constructor(newButtonContainer, siteMenuContainer, boardPresenter, statisticsPresenter, filtersModel) {
     this._newButtonContainer = newButtonContainer;
     this._siteMenuContainer = siteMenuContainer;
     this._boardPresenter = boardPresenter;
+    this._statisticsPresenter = statisticsPresenter;
     this._filtersModel = filtersModel;
 
     this._siteMenuComponent = new SiteMenuView();
@@ -30,17 +31,21 @@ export default class SiteMenu {
   _handleSiteMenuClick(menuItem) {
     switch (menuItem) {
       case MenuItem.ADD_NEW_EVENT:
-        // this._boardPresenter.destroy();
+        this._statisticsPresenter.destroy();
         this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
         this._boardPresenter.createEvent(this._handleNewEventFormClose);
-        // this._boardPresenter.init();
+        this._boardPresenter.init();
         this._newEventButtonComponent.getElement().disabled = true;
         this._siteMenuComponent.setMenuItem(MenuItem.TABLE);
         break;
       case MenuItem.TABLE:
+        this._statisticsPresenter.destroy();
+        this._boardPresenter.init();
         this._siteMenuComponent.setMenuItem(MenuItem.TABLE);
         break;
       case MenuItem.STATS:
+        this._boardPresenter.destroy();
+        this._statisticsPresenter.init();
         this._siteMenuComponent.setMenuItem(MenuItem.STATS);
         break;
     }
