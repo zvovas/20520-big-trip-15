@@ -18,11 +18,11 @@ export default class Filters {
     this._eventsModel.addObserver(this._handleModelEvent);
   }
 
-  init() {
+  init(isDisabled = false) {
+
     const filters = this._getFilters();
     const prevFilterComponent = this._filterComponent;
-
-    this._filterComponent = new EventFiltersView(filters, this._filterModel.getFilter());
+    this._filterComponent = new EventFiltersView(filters, this._filterModel.getFilter(), isDisabled);
     this._filterComponent.setChangeFilterTypeHandler(this._handleChangeFilterType);
 
     if (prevFilterComponent === null) {

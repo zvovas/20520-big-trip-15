@@ -26,7 +26,6 @@ export default class EventNew {
       return;
     }
 
-    console.log(this._destroyCallback);
     const BLANK_EVENT = {
       type: [...this._offersModel.getOffers().keys()][0],
       destination: '',

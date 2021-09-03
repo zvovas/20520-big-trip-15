@@ -4,11 +4,12 @@ import {render} from '../utils/render.js';
 import {FilterType, MenuItem, RenderPosition, UpdateType} from '../const.js';
 
 export default class SiteMenu {
-  constructor(newButtonContainer, siteMenuContainer, boardPresenter, statisticsPresenter, filtersModel) {
+  constructor(newButtonContainer, siteMenuContainer, boardPresenter, statisticsPresenter, filtersPresenter, filtersModel) {
     this._newButtonContainer = newButtonContainer;
     this._siteMenuContainer = siteMenuContainer;
     this._boardPresenter = boardPresenter;
     this._statisticsPresenter = statisticsPresenter;
+    this._filtersPresenter = filtersPresenter;
     this._filtersModel = filtersModel;
 
     this._siteMenuComponent = new SiteMenuView();
@@ -37,16 +38,19 @@ export default class SiteMenu {
         this._boardPresenter.createEvent(this._handleNewEventFormClose);
         this._boardPresenter.init();
         this._newEventButtonComponent.getElement().disabled = true;
+        this._filtersPresenter.init();
         this._siteMenuComponent.setMenuItem(MenuItem.TABLE);
         break;
       case MenuItem.TABLE:
         this._statisticsPresenter.destroy();
         this._boardPresenter.init();
+        this._filtersPresenter.init();
         this._siteMenuComponent.setMenuItem(MenuItem.TABLE);
         break;
       case MenuItem.STATS:
         this._boardPresenter.destroy();
         this._statisticsPresenter.init();
+        this._filtersPresenter.init(true);
         this._siteMenuComponent.setMenuItem(MenuItem.STATS);
         break;
     }

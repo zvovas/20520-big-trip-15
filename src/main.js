@@ -41,7 +41,7 @@ const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
 const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
 const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel, offersModel.getEventTypes(), pageBodyContainerElements);
-new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, statisticsPresenter, filtersModel);
+new SiteMenuPresenter(tripMainElement, siteMenuContainer, tripPresenter, statisticsPresenter, filtersPresenter, filtersModel);
 tripInfoPresenter.init();
 tripPresenter.init();
 filtersPresenter.init();
