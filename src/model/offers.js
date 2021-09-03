@@ -15,4 +15,8 @@ export default class Offers {
   getOffers() {
     return this._offers;
   }
+
+  getEventTypes() {
+    return [...this._offers.keys()];
+  }
 }

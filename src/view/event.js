@@ -3,7 +3,8 @@ import {
   convertDateToISO,
   humanizeDateMonthDay,
   humanizeTime,
-  calculateTimeDifference
+  calculateTimeSpend,
+  humanizeTimeSpend, calculateDuration
 } from '../utils/events.js';
 
 
@@ -31,6 +32,8 @@ const createEventTemplate = (event) => {
     ? 'event__favorite-btn event__favorite-btn--active'
     : 'event__favorite-btn';
 
+  const duration = humanizeTimeSpend(calculateTimeSpend(calculateDuration(event)));
+
   return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="${convertDateToISO(timeStart, false)}">${humanizeDateMonthDay(timeStart)}</time>
@@ -44,7 +47,7 @@ const createEventTemplate = (event) => {
           &mdash;
           <time class="event__end-time" datetime="${convertDateToISO(timeEnd)}">${humanizeTime(timeEnd)}</time>
         </p>
-        <p class="event__duration">${calculateTimeDifference(timeEnd, timeStart)}</p>
+        <p class="event__duration">${duration}</p>
       </div>
       <p class="event__price">
         &euro;&nbsp;<span class="event__price-value">${price}</span>
