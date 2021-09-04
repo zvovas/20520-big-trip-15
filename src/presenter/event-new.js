@@ -1,8 +1,17 @@
 import EditFormView from '../view/edit-form.js';
-import {RenderPosition, UpdateType, UserAction} from '../const.js';
+import {RenderPosition, UpdateType, UserAction, EVENT_TYPES} from '../const.js';
 import {render, remove} from '../utils/render.js';
 import {nanoid} from 'nanoid';
 import dayjs from 'dayjs';
+
+const BLANK_EVENT = {
+  type: EVENT_TYPES[0],
+  destination: '',
+  offers: [],
+  timeStart: dayjs().toDate(),
+  timeEnd: dayjs().toDate(),
+  price: '',
+};
 
 export default class EventNew {
   constructor(eventListContainer, destinationsModel, offersModel, changeData) {
@@ -25,15 +34,6 @@ export default class EventNew {
     if (this._editFormComponent !== null) {
       return;
     }
-
-    const BLANK_EVENT = {
-      type: [...this._offersModel.getOffers().keys()][0],
-      destination: '',
-      offers: [],
-      timeStart: dayjs().toDate(),
-      timeEnd: dayjs().toDate(),
-      price: '',
-    };
 
     this._editFormComponent = new EditFormView(BLANK_EVENT, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);

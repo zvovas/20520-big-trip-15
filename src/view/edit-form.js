@@ -75,7 +75,7 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
   } = data;
 
   const eventTypeFieldset = [...offersForTypes.keys()].map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
-  const offersOfType = offersForTypes.get(type);
+  const offersOfType = type ? offersForTypes.get(type).offers : '';
   const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers) : '';
 
   const destinationDatalist = [...destinationsInfo.keys()].map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
@@ -163,7 +163,6 @@ export default class EditForm extends SmartView {
     this._timeEndChangeHandler = this._timeEndChangeHandler.bind(this);
     this._changePriceHandler = this._changePriceHandler.bind(this);
     this._deleteClickHandler = this._deleteClickHandler.bind(this);
-
     this._setInnerHandler();
     this._setDatepicker();
   }
@@ -187,7 +186,7 @@ export default class EditForm extends SmartView {
 
     const eventOffers = [];
     const eventOfferElements = this.getElement().querySelectorAll('.event__offer-checkbox');
-    const offersOfType = this._offers.get(this._data.type);
+    const offersOfType = this._offers.get(this._data.type).offers;
 
     eventOfferElements.forEach((element) => {
       if (element.checked) {
@@ -283,24 +282,29 @@ export default class EditForm extends SmartView {
   }
 
   _setDatepicker() {
+    const commonSettings = {
+      dateFormat: 'd/m/Y H:i',
+      enableTime: true,
+    };
+
     this._datepickerStart = flatpickr(
       this.getElement().querySelector('[name="event-start-time"]'),
-      {
-        dateFormat: 'd/m/Y H:i',
-        enableTime: true,
-        defaultDate: this._data.timeStart,
-        onChange: this._timeStartChangeHandler,
-      },
+      Object.assign(
+        commonSettings,
+        {
+          defaultDate: this._data.timeStart,
+          onChange: this._timeStartChangeHandler,
+        }),
     );
 
     this._datepickerEnd = flatpickr(
       this.getElement().querySelector('[name="event-end-time"]'),
-      {
-        dateFormat: 'd/m/Y H:i',
-        enableTime: true,
-        defaultDate: this._data.timeEnd,
-        onChange: this._timeEndChangeHandler,
-      },
+      Object.assign(
+        commonSettings,
+        {
+          defaultDate: this._data.timeEnd,
+          onChange: this._timeEndChangeHandler,
+        }),
     );
   }
 
