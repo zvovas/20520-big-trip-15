@@ -5,12 +5,12 @@ const MAX_CITIES_IN_ROUTE = 3;
 
 const createRouteTemplate = (destinations) => (destinations.length <= MAX_CITIES_IN_ROUTE)
   ? destinations.join('&nbsp;&mdash;&nbsp;')
-  : `${destinations[0]}&nbsp;&mdash;&nbsp;&hellip;&nbsp;&mdash;&nbsp;${destinations[destinations.length - 1]}`;
+  : `${destinations[destinations.length - 1]}&nbsp;&mdash;&nbsp;&hellip;&nbsp;&mdash;&nbsp;${destinations[0]}`;
 
 
 const createDatesTemplate =  (events) => {
-  const dateStart = events[0].timeStart;
-  const dateEnd = events[events.length - 1].timeEnd;
+  const dateStart = events[events.length - 1].timeStart;
+  const dateEnd = events[0].timeEnd;
   return (dateStart.getMonth() === dateEnd.getMonth())
     ? `${humanizeDateMonthDay(dateStart)}&nbsp;&mdash;&nbsp;${dateEnd.getDate()}`
     : `${humanizeDateDayMonth(dateStart)}&nbsp;&mdash;&nbsp;${humanizeDateDayMonth(dateEnd)}`;

@@ -7,7 +7,11 @@ export default class Offers {
     offers.forEach((offer) => this._offers.set(offer.type, offer));
   }
 
-  getOffers(type) {
-    return this._offers.get(type);
+  getOffers() {
+    return this._offers;
+  }
+
+  getEventTypes() {
+    return [...this._offers.keys()];
   }
 }

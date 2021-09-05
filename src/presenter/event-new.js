@@ -1,13 +1,12 @@
-import {DESTINATIONS, EVENT_TYPES} from '../const.js';
 import EditFormView from '../view/edit-form.js';
-import {RenderPosition, UpdateType, UserAction} from '../const.js';
+import {RenderPosition, UpdateType, UserAction, EVENT_TYPES} from '../const.js';
 import {render, remove} from '../utils/render.js';
 import {nanoid} from 'nanoid';
 import dayjs from 'dayjs';
 
 const BLANK_EVENT = {
   type: EVENT_TYPES[0],
-  destination: DESTINATIONS[0],
+  destination: '',
   offers: [],
   timeStart: dayjs().toDate(),
   timeEnd: dayjs().toDate(),
@@ -15,34 +14,30 @@ const BLANK_EVENT = {
 };
 
 export default class EventNew {
-  constructor(eventListContainer, changeData, destinationsModel, offersModel) {
+  constructor(eventListContainer, destinationsModel, offersModel, changeData) {
     this._eventListContainer = eventListContainer;
     this._changeData = changeData;
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
 
     this._editFormComponent = null;
+    this._destroyCallback = null;
 
     this._handleSubmitForm = this._handleSubmitForm.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
-    this._handleChangeDestination = this._handleChangeDestination.bind(this);
-    this._handleChangeType = this._handleChangeType.bind(this);
   }
 
-  init() {
+  init(callback) {
+    this._destroyCallback = callback;
+
     if (this._editFormComponent !== null) {
       return;
     }
 
-    const destinationInfo = this._destinationsModel.getDestination(DESTINATIONS[0]);
-    const currentOffersOfType = this._offersModel.getOffers(EVENT_TYPES[0]);
-
-    this._editFormComponent = new EditFormView(BLANK_EVENT, destinationInfo, currentOffersOfType);
+    this._editFormComponent = new EditFormView(BLANK_EVENT, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
     this._editFormComponent.setSubmitFormHandler(this._handleSubmitForm);
     this._editFormComponent.setDeleteClickHandler(this._handleDeleteClick);
-    this._editFormComponent.setChangeDestinationHandler(this._handleChangeDestination);
-    this._editFormComponent.setChangeTypeHandler(this._handleChangeType);
 
     render(this._eventListContainer, this._editFormComponent, RenderPosition.AFTERBEGIN);
 
@@ -54,18 +49,14 @@ export default class EventNew {
       return;
     }
 
+    if (this._destroyCallback !== null) {
+      this._destroyCallback();
+    }
+
     remove(this._editFormComponent);
     this._editFormComponent = null;
 
     document.removeEventListener('keydown', this._escKeyDownHandler);
-  }
-
-  _handleChangeDestination(newDestination) {
-    return this._destinationsModel.getDestination(newDestination);
-  }
-
-  _handleChangeType(newType) {
-    return this._offersModel.getOffers(newType);
   }
 
   _handleSubmitForm(event) {
