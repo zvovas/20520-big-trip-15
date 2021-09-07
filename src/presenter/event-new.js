@@ -1,7 +1,6 @@
 import EditFormView from '../view/edit-form.js';
 import {RenderPosition, UpdateType, UserAction, EVENT_TYPES} from '../const.js';
 import {render, remove} from '../utils/render.js';
-import {nanoid} from 'nanoid';
 import dayjs from 'dayjs';
 
 const BLANK_EVENT = {
@@ -60,7 +59,7 @@ export default class EventNew {
   }
 
   _handleSubmitForm(event) {
-    this._changeData(UserAction.ADD_EVENT, UpdateType.MAJOR, Object.assign({id: nanoid()}, event));
+    this._changeData(UserAction.ADD_EVENT, UpdateType.MAJOR, Object.assign({isFavorite: false}, event));
     this.destroy();
   }
 

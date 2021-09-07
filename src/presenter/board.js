@@ -40,6 +40,7 @@ export default class Board {
   }
 
   init() {
+    this._renderEventSort();
     this._renderBoard();
 
     this._eventsModel.addObserver(this._handleModelEvent);
@@ -86,10 +87,14 @@ export default class Board {
         });
         break;
       case UserAction.ADD_EVENT:
-        this._eventsModel.addEvent(updateType, update);
+        this._api.addPoint(update).then((response) => {
+          this._eventsModel.addEvent(updateType, response);
+        });
         break;
       case UserAction.DELETE_EVENT:
-        this._eventsModel.deleteEvent(updateType, update);
+        this._api.deletePoint(update).then(() => {
+          this._eventsModel.deleteEvent(updateType, update);
+        });
         break;
     }
   }
@@ -162,7 +167,6 @@ export default class Board {
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
     this._eventPresenter.clear();
 
-    remove(this._eventSortComponent);
     remove(this._loadingComponent);
 
     if(this._noEventComponent) {
@@ -185,7 +189,6 @@ export default class Board {
     }
 
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
-    this._renderEventSort();
 
     if (this._getEvents().length === 0) {
       this._renderNoEvent();

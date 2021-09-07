@@ -13,11 +13,6 @@ import {render} from './utils/render.js';
 
 import Api from './api.js';
 
-//TODO:
-// при смене города undefined
-// При сохранении сбрасываются доп. опции
-
-
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 const AUTHORIZATION = 'Basic dp5em1xxAgL9q5';
 

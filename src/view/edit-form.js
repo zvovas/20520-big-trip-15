@@ -1,4 +1,3 @@
-import he from 'he';
 import SmartView from './smart.js';
 import {humanizeDateTime} from '../utils/events.js';
 import flatpickr from 'flatpickr';
@@ -13,7 +12,7 @@ const createEventTypeInputTemplate = (type, isCurrentType) => {
   </div>`;
 };
 
-const createDestinationOptionTemplate = (destination) => `<option value="${he.encode(destination)}"></option>`;
+const createDestinationOptionTemplate = (destination) => `<option value="${destination}"></option>`;
 
 const createOfferTemplate = ({title, price}, isChecked = false, id) => {
   const checkedStatus = (isChecked) ? 'checked' : '';
@@ -80,7 +79,7 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
   const offersOfType = offersForTypes.get(type).offers;
   const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers, id) : '';
 
-  const destinationName = destination.name;
+  const destinationName = destination ? destination.name : '';
   const destinationDatalist = [...destinationsInfo.keys()].map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
   const information =  destinationsInfo.get(destinationName);
   const isDescription =  Boolean(information && information.description);
@@ -94,11 +93,11 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
-          <label class="event__type  event__type-btn" for="event-type-toggle-1">
+          <label class="event__type  event__type-btn" for="event-type-toggle-${id}">
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
@@ -109,29 +108,29 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
         </div>
 
         <div class="event__field-group  event__field-group--destination">
-          <label class="event__label  event__type-output" for="event-destination-1">
+          <label class="event__label  event__type-output" for="event-destination-${id}">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationName}" list="destination-list-1" required>
-          <datalist id="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destinationName}" list="destination-list-${id}" required>
+          <datalist id="destination-list-${id}">
             ${destinationDatalist}
           </datalist>
         </div>
 
         <div class="event__field-group  event__field-group--time">
-          <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${humanizeDateTime(timeStart)}">
+          <label class="visually-hidden" for="event-start-time-${id}">From</label>
+          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${humanizeDateTime(timeStart)}">
           &mdash;
-          <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${humanizeDateTime(timeEnd)}">
+          <label class="visually-hidden" for="event-end-time-${id}">To</label>
+          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${humanizeDateTime(timeEnd)}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
-          <label class="event__label" for="event-price-1">
+          <label class="event__label" for="event-price-${id}">
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}" required>
+          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${price}" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -188,15 +187,15 @@ export default class EditForm extends SmartView {
     evt.preventDefault();
 
     const eventOffers = [];
-    const eventOfferElements = this.getElement().querySelectorAll('.event__offer-title');
+    const eventOfferCheckboxes = this.getElement().querySelectorAll('.event__offer-checkbox');
+    const eventOfferTitles = this.getElement().querySelectorAll('.event__offer-title');
     const offersOfType = this._offers.get(this._data.type).offers;
 
-    eventOfferElements.forEach((element) => {
-      if (element.checked) {
-        const name = element.textContent;
-        eventOffers.push(offersOfType.find((offer) => offer.title === name));
+    for (let i = 0; i < eventOfferCheckboxes.length; i++) {
+      if (eventOfferCheckboxes[i].checked) {
+        eventOffers.push(offersOfType.find((offer) => offer.title === eventOfferTitles[i].textContent));
       }
-    });
+    }
 
     this.updateData({
       offers: eventOffers,
@@ -229,7 +228,7 @@ export default class EditForm extends SmartView {
   _changeDestinationHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      destination: evt.currentTarget.value,
+      destination: this._destinationsInfo.get(evt.currentTarget.value),
     });
   }
 

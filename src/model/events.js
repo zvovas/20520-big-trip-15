@@ -8,7 +8,6 @@ export default class Events extends AbstractObserver {
 
   setEvents(updateType, events) {
     this._events = events.slice();
-    console.log(this._events);
 
     this._notify(updateType);
   }

@@ -105,9 +105,6 @@ export default class Event {
     const isDateStartEqual = isDatesEqual(this._event.timeStart, event.timeStart);
     const isDurationEqual = calculateDuration(this._event) === calculateDuration(event);
     const isPriceEqual = this._event.price === event.price;
-    console.log(this._event.offers.reduce((sum, offer) => sum + offer.price, 0));
-    console.log(event);
-    console.log(event.offers.reduce((sum, offer) => sum + offer.price, 0));
     const isOffersPriceEqual = this._event.offers.reduce((sum, offer) => sum + offer.price, 0) === event.offers.reduce((sum, offer) => sum + offer.price, 0);
     const isDestinationEqual = this._event.destination === event.destination;
     const isDateEndEqual = isDatesEqual(this._event.timeEnd, event.timeEnd);
