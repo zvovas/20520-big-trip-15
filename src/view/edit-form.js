@@ -3,6 +3,7 @@ import SmartView from './smart.js';
 import {humanizeDateTime} from '../utils/events.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import {EVENT_TYPES} from '../const.js';
 
 const createEventTypeInputTemplate = (type, isCurrentType) => {
   const checkedStatus = isCurrentType ? 'checked' : '';
@@ -14,11 +15,11 @@ const createEventTypeInputTemplate = (type, isCurrentType) => {
 
 const createDestinationOptionTemplate = (destination) => `<option value="${he.encode(destination)}"></option>`;
 
-const createOfferTemplate = ({title, price}, isChecked = false) => {
+const createOfferTemplate = ({title, price}, isChecked = false, id) => {
   const checkedStatus = (isChecked) ? 'checked' : '';
   return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title.split(' ').join('-')}-1" type="checkbox" name="event-offer-${title.split(' ').join('-')}" ${checkedStatus}>
-    <label class="event__offer-label" for="event-offer-${title.split(' ').join('-')}-1">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title.split(' ').join('-')}-${id}" type="checkbox" name="event-offer-${title.split(' ').join('-')}" ${checkedStatus}>
+    <label class="event__offer-label" for="event-offer-${title.split(' ').join('-')}-${id}">
       <span class="event__offer-title">${title}</span>
       &plus;&euro;&nbsp;
       <span class="event__offer-price">${price}</span>
@@ -26,15 +27,15 @@ const createOfferTemplate = ({title, price}, isChecked = false) => {
   </div>`;
 };
 
-const createAllOffersTemplate = (offersOfType, offersOfData = []) => offersOfType.map((offerOfType) => (
+const createAllOffersTemplate = (offersOfType, offersOfData = [], id) => offersOfType.map((offerOfType) => (
   offersOfData.some((offerOfData) => offerOfData.title === offerOfType.title)
-    ? createOfferTemplate(offerOfType, true)
-    : createOfferTemplate(offerOfType, false)
+    ? createOfferTemplate(offerOfType, true, id)
+    : createOfferTemplate(offerOfType, false, id)
 )).join('');
 
-const createOffersTemplate = (offersOfType, offersOfData) => {
+const createOffersTemplate = (offersOfType, offersOfData, id) => {
 
-  const offersTemplate = createAllOffersTemplate(offersOfType, offersOfData);
+  const offersTemplate = createAllOffersTemplate(offersOfType, offersOfData, id);
 
   return `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -66,6 +67,7 @@ const createDestinationInfoTemplate = ({description, pictures}, isDescription, i
 
 const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) => {
   const {
+    id,
     type,
     destination,
     offers,
@@ -74,12 +76,13 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
     price,
   } = data;
 
-  const eventTypeFieldset = [...offersForTypes.keys()].map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
-  const offersOfType = type ? offersForTypes.get(type).offers : '';
-  const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers) : '';
+  const eventTypeFieldset = EVENT_TYPES.map((eventType) => createEventTypeInputTemplate(eventType, eventType === type)).join('');
+  const offersOfType = offersForTypes.get(type).offers;
+  const offersTemplate = (offersOfType && offersOfType.length) ? createOffersTemplate(offersOfType, offers, id) : '';
 
+  const destinationName = destination.name;
   const destinationDatalist = [...destinationsInfo.keys()].map((eventDestination) => createDestinationOptionTemplate(eventDestination)).join('');
-  const information =  destinationsInfo.get(destination);
+  const information =  destinationsInfo.get(destinationName);
   const isDescription =  Boolean(information && information.description);
   const isPhotos =  Boolean(information && information.pictures && information.pictures.length);
   const informationTemplate = (isDescription || isPhotos) ? createDestinationInfoTemplate(information, isDescription, isPhotos) : '';
@@ -109,7 +112,7 @@ const createEditFormTemplate = (data, destinationsInfo, offersForTypes, isEdit) 
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination)}" list="destination-list-1" required>
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationName}" list="destination-list-1" required>
           <datalist id="destination-list-1">
             ${destinationDatalist}
           </datalist>
@@ -185,12 +188,12 @@ export default class EditForm extends SmartView {
     evt.preventDefault();
 
     const eventOffers = [];
-    const eventOfferElements = this.getElement().querySelectorAll('.event__offer-checkbox');
+    const eventOfferElements = this.getElement().querySelectorAll('.event__offer-title');
     const offersOfType = this._offers.get(this._data.type).offers;
 
     eventOfferElements.forEach((element) => {
       if (element.checked) {
-        const name = element.name.split('-').splice(2).join(' ');
+        const name = element.textContent;
         eventOffers.push(offersOfType.find((offer) => offer.title === name));
       }
     });

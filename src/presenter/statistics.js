@@ -1,19 +1,18 @@
 import StatisticsView from '../view/statistics.js';
 import {remove, render} from '../utils/render.js';
-import {RenderPosition} from '../const.js';
+import {EVENT_TYPES, RenderPosition} from '../const.js';
 
 export default class Statistics {
-  constructor(statisticsContainer, eventsModel, eventTypes, pageBodyContainerElements) {
+  constructor(statisticsContainer, eventsModel, pageBodyContainerElements) {
     this._statisticsContainer = statisticsContainer;
     this._eventsModel = eventsModel;
-    this._eventTypes = eventTypes;
     this._pageBodyContainerElements = pageBodyContainerElements;
     this._statisticsComponent = null;
   }
 
   init() {
     if (!this._statisticsComponent) {
-      this._statisticsComponent = new StatisticsView(this._eventsModel.getEvents(), this._eventTypes);
+      this._statisticsComponent = new StatisticsView(this._eventsModel.getEvents(), EVENT_TYPES);
     }
 
     render(this._statisticsContainer, this._statisticsComponent, RenderPosition.BEFOREEND);

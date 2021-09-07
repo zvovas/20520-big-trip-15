@@ -32,6 +32,7 @@ export const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   RESET: 'RESET',
+  INIT: 'INIT',
 };
 
 export const MenuItem = {
