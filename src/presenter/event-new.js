@@ -58,6 +58,25 @@ export default class EventNew {
     document.removeEventListener('keydown', this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._editFormComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._editFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this._editFormComponent.shake(resetFormState);
+  }
+
   _handleSubmitForm(event) {
     this._changeData(UserAction.ADD_EVENT, UpdateType.MAJOR, Object.assign({isFavorite: false}, event));
     this.destroy();

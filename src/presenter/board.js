@@ -2,7 +2,7 @@ import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
 import LoadingView from '../view/loading.js';
-import EventPresenter from './event.js';
+import EventPresenter, {State as EventPresenterViewState} from './event.js';
 import EventNewPresenter from './event-new.js';
 import {remove, render, replace} from '../utils/render.js';
 import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
@@ -82,19 +82,34 @@ export default class Board {
         updateType = ((this._currentSortType === SortType.DAY && !isDateStartEqual) ||
           (this._currentSortType === SortType.TIME && !isDurationEqual) ||
           (this._currentSortType === SortType.PRICE && !isPriceEqual)) ? UpdateType.MAJOR : updateType;
-        this._api.updatePoint(update).then((response) => {
-          this._eventsModel.updateEvent(updateType, response);
-        });
+        this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.SAVING);
+        this._api.updatePoint(update)
+          .then((response) => {
+            this._eventsModel.updateEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.ABORTING);
+          });
         break;
       case UserAction.ADD_EVENT:
-        this._api.addPoint(update).then((response) => {
-          this._eventsModel.addEvent(updateType, response);
-        });
+        this._eventNewPresenter.setSaving();
+        this._api.addPoint(update)
+          .then((response) => {
+            this._eventsModel.addEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventNewPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_EVENT:
-        this._api.deletePoint(update).then(() => {
-          this._eventsModel.deleteEvent(updateType, update);
-        });
+        this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.DELETING);
+        this._api.deletePoint(update)
+          .then(() => {
+            this._eventsModel.deleteEvent(updateType, update);
+          })
+          .catch(() => {
+            this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.ABORTING);
+          });
         break;
     }
   }
