@@ -34,6 +34,6 @@ export const humanizeTimeSpend = ({countOfDay, countOfHour, countOfMinutes}) => 
 
 export const isDatesEqual = (dateA, dateB) =>  (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, 'D');
 
-export const compareTimeStart = (eventA, eventB) => eventB.timeStart - eventA.timeStart;
+export const compareTimeStart = (eventA, eventB) => eventA.timeStart - eventB.timeStart;
 export const compareDuration = (eventA, eventB) => calculateDuration(eventB) - calculateDuration(eventA);
 export const comparePrice = (eventA, eventB) => eventB.price - eventA.price;

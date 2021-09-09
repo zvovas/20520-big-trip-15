@@ -5,28 +5,22 @@ import EventsModel from './model/events.js';
 import OffersModel from './model/offers.js';
 import FiltersModel from './model/filters.js';
 import DestinationsModel from './model/destinations.js';
-import {compareTimeStart} from './utils/events.js';
-
-import {generateEvent} from './mock/event.js';
-import {allDestinations} from './mock/destinations.js';
-import {allOffers} from './mock/offers.js';
 import TripInfoPresenter from './presenter/trip-info.js';
 import {FilterType, MenuItem, RenderPosition, UpdateType} from './const.js';
 import SiteMenuView from './view/site-menu.js';
 import NewEventButtonView from './view/new-event-button.js';
 import {render} from './utils/render.js';
 
-const TRIP_EVENT_COUNT = 15;
+import Api from './api.js';
 
-const destinationsModel = new DestinationsModel();
-destinationsModel.setDestinations(allDestinations);
+const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
+const AUTHORIZATION = 'Basic dp5em1xxAgL9q5';
 
-const offersModel = new OffersModel();
-offersModel.setOffers(allOffers);
+const api = new Api(END_POINT, AUTHORIZATION);
 
-const events = Array(TRIP_EVENT_COUNT).fill().map(generateEvent).sort(compareTimeStart);
 const eventsModel = new EventsModel();
-eventsModel.setEvents(events);
+const destinationsModel = new DestinationsModel();
+const offersModel = new OffersModel();
 
 const filtersModel = new FiltersModel();
 
@@ -41,14 +35,11 @@ const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
-const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel);
-const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel, offersModel.getEventTypes(), pageBodyContainerElements);
+const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel, api);
+const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel, pageBodyContainerElements);
 
 const siteMenuComponent = new SiteMenuView();
 const newEventButtonComponent = new NewEventButtonView();
-
-render(siteMenuContainer, siteMenuComponent, RenderPosition.BEFOREEND);
-render(tripMainElement, newEventButtonComponent, RenderPosition.BEFOREEND);
 
 const handleNewEventFormClose = () => {
   newEventButtonComponent.getElement().disabled = false;
@@ -81,11 +72,28 @@ const handleSiteMenuClick = (menuItem) => {
   }
 };
 
-siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
-newEventButtonComponent.setMenuClickHandler(handleSiteMenuClick);
+const renderControls = () => {
+  render(siteMenuContainer, siteMenuComponent, RenderPosition.BEFOREEND);
+  render(tripMainElement, newEventButtonComponent, RenderPosition.BEFOREEND);
+  siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
+  newEventButtonComponent.setMenuClickHandler(handleSiteMenuClick);
+};
+
+Promise.all([api.getPoints(), api.getDestinations(), api.getOffers()])
+  .then((results) => {
+    const [events, destinations, offers] = results;
+    offersModel.setOffers(offers);
+    destinationsModel.setDestinations(destinations);
+    eventsModel.setEvents(UpdateType.INIT, events.map(EventsModel.adaptToClient));
+    renderControls();
+  })
+  .catch(() => {
+    eventsModel.setEvents(UpdateType.INIT, []);
+    destinationsModel.setDestinations([]);
+    offersModel.setOffers([]);
+    renderControls();
+  });
 
 tripInfoPresenter.init();
 tripPresenter.init();
 filtersPresenter.init();
-
-

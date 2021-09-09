@@ -1,7 +1,8 @@
 import EventSortView from '../view/event-sort.js';
 import EventListView from '../view/event-list.js';
 import NoEventView from '../view/no-event.js';
-import EventPresenter from './event.js';
+import LoadingView from '../view/loading.js';
+import EventPresenter, {State as EventPresenterViewState} from './event.js';
 import EventNewPresenter from './event-new.js';
 import {remove, render, replace} from '../utils/render.js';
 import {FilterType, RenderPosition, SortType, UpdateType, UserAction} from '../const.js';
@@ -9,18 +10,23 @@ import {compareDuration, comparePrice, compareTimeStart} from '../utils/events.j
 import {filter} from '../utils/filter.js';
 
 export default class Board {
-  constructor(boardMainContainer, eventsModel, filtersModel, destinationsModel, offersModel) {
+  constructor(boardMainContainer, eventsModel, filtersModel, destinationsModel, offersModel, api) {
     this._boardMainContainer = boardMainContainer;
     this._eventsModel = eventsModel;
     this._filtersModel = filtersModel;
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
+    this._api = api;
+
     this._eventPresenter = new Map();
 
     this._eventSortComponent = new EventSortView();
     this._eventListComponent = new EventListView();
+    this._loadingComponent = new LoadingView();
+
     this._filterType = FilterType.EVERYTHING;
     this._currentSortType = SortType.DAY;
+    this._isLoading = true;
 
     this._noEventComponent = null;
 
@@ -34,6 +40,7 @@ export default class Board {
   }
 
   init() {
+    this._renderEventSort();
     this._renderBoard();
 
     this._eventsModel.addObserver(this._handleModelEvent);
@@ -51,8 +58,6 @@ export default class Board {
   }
 
   createEvent(callback) {
-    // this._currentSortType = SortType.DAY;
-    // this._filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
     this._eventNewPresenter.init(callback);
   }
 
@@ -77,13 +82,34 @@ export default class Board {
         updateType = ((this._currentSortType === SortType.DAY && !isDateStartEqual) ||
           (this._currentSortType === SortType.TIME && !isDurationEqual) ||
           (this._currentSortType === SortType.PRICE && !isPriceEqual)) ? UpdateType.MAJOR : updateType;
-        this._eventsModel.updateEvent(updateType, update);
+        this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.SAVING);
+        this._api.updatePoint(update)
+          .then((response) => {
+            this._eventsModel.updateEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.ABORTING);
+          });
         break;
       case UserAction.ADD_EVENT:
-        this._eventsModel.addEvent(updateType, update);
+        this._eventNewPresenter.setSaving();
+        this._api.addPoint(update)
+          .then((response) => {
+            this._eventsModel.addEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventNewPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_EVENT:
-        this._eventsModel.deleteEvent(updateType, update);
+        this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.DELETING);
+        this._api.deletePoint(update)
+          .then(() => {
+            this._eventsModel.deleteEvent(updateType, update);
+          })
+          .catch(() => {
+            this._eventPresenter.get(update.id).setViewState(EventPresenterViewState.ABORTING);
+          });
         break;
     }
   }
@@ -103,7 +129,17 @@ export default class Board {
       case UpdateType.RESET:
         this._clearBoard({resetSortType: true});
         this._renderBoard();
+        break;
+      case UpdateType.INIT:
+        this._isLoading = false;
+        remove(this._loadingComponent);
+        this._renderBoard();
+        break;
     }
+  }
+
+  _renderLoading() {
+    render(this._boardMainContainer, this._loadingComponent, RenderPosition.BEFOREEND);
   }
 
   _renderEventSort() {
@@ -146,6 +182,8 @@ export default class Board {
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
     this._eventPresenter.clear();
 
+    remove(this._loadingComponent);
+
     if(this._noEventComponent) {
       remove(this._noEventComponent);
     }
@@ -160,8 +198,12 @@ export default class Board {
   }
 
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
-    this._renderEventSort();
 
     if (this._getEvents().length === 0) {
       this._renderNoEvent();

@@ -9,6 +9,12 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
+export const State = {
+  SAVING: 'SAVING',
+  DELETING: 'DELETING',
+  ABORTING: 'ABORTING',
+};
+
 export default class Event {
   constructor(eventListContainer, destinationsModel, offersModel, changeData, changeMode) {
     this._eventListContainer = eventListContainer;
@@ -49,12 +55,13 @@ export default class Event {
       return;
     }
 
-    if (this._eventListContainer.getElement().contains(prevEventComponent.getElement())) {
+    if (this._mode === Mode.DEFAULT) {
       replace(this._eventComponent, prevEventComponent);
     }
 
-    if (this._eventListContainer.getElement().contains(prevEditFormComponent.getElement())) {
-      replace(this._editFormComponent, prevEditFormComponent);
+    if (this._mode === Mode.EDITING) {
+      replace(this._eventComponent, prevEditFormComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevEventComponent);
@@ -69,6 +76,34 @@ export default class Event {
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceFormToEvent();
+    }
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._editFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._editFormComponent.updateData({
+          isDisabled: true,
+          isSaving: true,
+        });
+        break;
+      case State.DELETING:
+        this._editFormComponent.updateData({
+          isDisabled: true,
+          isDeleting: true,
+        });
+        break;
+      case State.ABORTING:
+        this._eventComponent.shake(resetFormState);
+        this._editFormComponent.shake(resetFormState);
     }
   }
 
@@ -112,7 +147,6 @@ export default class Event {
     const isMinorUpdate = !isPriceEqual || !isOffersPriceEqual || !isDestinationEqual || !isDateEndEqual;
 
     this._changeData(UserAction.UPDATE_EVENT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, event, {isDateStartEqual, isDurationEqual, isPriceEqual});
-    this._replaceFormToEvent();
   }
 
   _handleDeleteClick(event) {
