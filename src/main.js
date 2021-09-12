@@ -1,17 +1,17 @@
-import FiltersPresenter from './presenter/filters.js';
-import BoardPresenter from './presenter/board.js';
-import StatisticsPresenter from './presenter/statistics.js';
 import EventsModel from './model/events.js';
 import OffersModel from './model/offers.js';
-import FiltersModel from './model/filters.js';
 import DestinationsModel from './model/destinations.js';
+import FiltersModel from './model/filters.js';
+import BoardPresenter from './presenter/board.js';
+import FiltersPresenter from './presenter/filters.js';
+import StatisticsPresenter from './presenter/statistics.js';
 import TripInfoPresenter from './presenter/trip-info.js';
-import {FilterType, MenuItem, RenderPosition, UpdateType} from './const.js';
 import SiteMenuView from './view/site-menu.js';
 import NewEventButtonView from './view/new-event-button.js';
+import Api from './api/api.js';
 import {render} from './utils/render.js';
-
-import Api from './api.js';
+import {FilterType, MenuItem, RenderPosition, UpdateType} from './const.js';
+import {toast} from './utils/toast.js';
 
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 const AUTHORIZATION = 'Basic dp5em1xxAgL9q5';
@@ -72,28 +72,43 @@ const handleSiteMenuClick = (menuItem) => {
   }
 };
 
-const renderControls = () => {
+const renderControls = (isDisabledNewButton) => {
+  newEventButtonComponent.setDisabledState(isDisabledNewButton);
   render(siteMenuContainer, siteMenuComponent, RenderPosition.BEFOREEND);
   render(tripMainElement, newEventButtonComponent, RenderPosition.BEFOREEND);
   siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
   newEventButtonComponent.setMenuClickHandler(handleSiteMenuClick);
 };
 
-Promise.all([api.getPoints(), api.getDestinations(), api.getOffers()])
+let isInitialData = false;
+
+api.getInitialData()
   .then((results) => {
-    const [events, destinations, offers] = results;
-    offersModel.setOffers(offers);
+    const [destinations, offers] = results;
     destinationsModel.setDestinations(destinations);
+    offersModel.setOffers(offers);
+    isInitialData = true;
+  })
+  .then(() => api.getPoints())
+  .then((events) => {
     eventsModel.setEvents(UpdateType.INIT, events.map(EventsModel.adaptToClient));
     renderControls();
   })
   .catch(() => {
-    eventsModel.setEvents(UpdateType.INIT, []);
-    destinationsModel.setDestinations([]);
-    offersModel.setOffers([]);
-    renderControls();
+    if (isInitialData) {
+      eventsModel.setEvents(UpdateType.INIT, []);
+      renderControls(!isInitialData);
+    } else {
+      eventsModel.setEvents(UpdateType.INIT, []);
+      renderControls(!isInitialData);
+      toast('Error loading data');
+    }
   });
 
 tripInfoPresenter.init();
 tripPresenter.init();
 filtersPresenter.init();
+
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('/sw.js');
+});

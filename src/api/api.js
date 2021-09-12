@@ -1,4 +1,4 @@
-import EventsModel from './model/events.js';
+import EventsModel from '../model/events.js';
 
 const Method = {
   GET: 'GET',
@@ -47,12 +47,16 @@ export default class Api {
     });
   }
 
-  getDestinations() {
+  getInitialData() {
+    return Promise.all([this._getDestinations(), this._getOffers()]);
+  }
+
+  _getDestinations() {
     return this._load({url: 'destinations'})
       .then(Api.toJSON);
   }
 
-  getOffers() {
+  _getOffers() {
     return this._load({url: 'offers'})
       .then(Api.toJSON);
   }
