@@ -15,7 +15,8 @@ export default class Api {
 
   getPoints() {
     return this._load({url: 'points'})
-      .then(Api.toJSON);
+      .then(Api.toJSON)
+      .then((points) => points.map(EventsModel.adaptToClient));
   }
 
   updatePoint(event) {
@@ -49,6 +50,16 @@ export default class Api {
 
   getInitialData() {
     return Promise.all([this._getDestinations(), this._getOffers()]);
+  }
+
+  sync(data) {
+    return this._load({
+      url: 'points/sync',
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    })
+      .then(Api.toJSON);
   }
 
   _getDestinations() {

@@ -9,14 +9,28 @@ import TripInfoPresenter from './presenter/trip-info.js';
 import SiteMenuView from './view/site-menu.js';
 import NewEventButtonView from './view/new-event-button.js';
 import Api from './api/api.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 import {render} from './utils/render.js';
-import {FilterType, MenuItem, RenderPosition, UpdateType} from './const.js';
 import {toast} from './utils/toast.js';
+import {isOnline} from './utils/common.js';
+import {FilterType, MenuItem, RenderPosition, UpdateType} from './const.js';
 
-const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
-const AUTHORIZATION = 'Basic dp5em1xxAgL9q5';
+const END_POINT = 'https://15.ecmascript.pages.academy/big-trip';
+const AUTHORIZATION = 'Basic dp5em1xxAgL915';
+const STORE_PREFIX = 'big-trip-localstorage';
+const STORE_VER = 'v15';
+const StoreName = {
+  EVENTS: `${STORE_PREFIX}-events-${STORE_VER}`,
+  DESTINATIONS: `${STORE_PREFIX}-destinations-${STORE_VER}`,
+  OFFERS: `${STORE_PREFIX}-offers-${STORE_VER}`,
+};
 
 const api = new Api(END_POINT, AUTHORIZATION);
+const eventsStore = new Store(StoreName.EVENTS, window.localStorage);
+const destinationsStore = new Store(StoreName.DESTINATIONS, window.localStorage);
+const offersStore = new Store(StoreName.OFFERS, window.localStorage);
+const apiWithProvider = new Provider(api, eventsStore, destinationsStore, offersStore);
 
 const eventsModel = new EventsModel();
 const destinationsModel = new DestinationsModel();
@@ -35,7 +49,7 @@ const tripEventsElement = pageMainElement.querySelector('.trip-events');
 
 const tripInfoPresenter = new TripInfoPresenter(tripMainElement, eventsModel);
 const filtersPresenter = new FiltersPresenter(tripFiltersElement, filtersModel, eventsModel);
-const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel, api);
+const tripPresenter = new BoardPresenter(tripEventsElement, eventsModel, filtersModel, destinationsModel, offersModel, apiWithProvider);
 const statisticsPresenter = new StatisticsPresenter(pageMainElement, eventsModel, pageBodyContainerElements);
 
 const siteMenuComponent = new SiteMenuView();
@@ -51,8 +65,13 @@ const handleSiteMenuClick = (menuItem) => {
       statisticsPresenter.destroy();
       tripPresenter.destroy();
       filtersModel.setFilter(UpdateType.RESET, FilterType.EVERYTHING);
-      tripPresenter.createEvent(handleNewEventFormClose);
       tripPresenter.init();
+      if (!isOnline()) {
+        toast('You can\'t create new task offline');
+        siteMenuComponent.setMenuItem(MenuItem.TABLE);
+        break;
+      }
+      tripPresenter.createEvent(handleNewEventFormClose);
       newEventButtonComponent.getElement().disabled = true;
       filtersPresenter.init();
       siteMenuComponent.setMenuItem(MenuItem.TABLE);
@@ -82,28 +101,28 @@ const renderControls = (isDisabledNewButton) => {
 
 let isInitialData = false;
 
-api.getInitialData()
+apiWithProvider.getInitialData()
   .then((results) => {
     const [destinations, offers] = results;
     destinationsModel.setDestinations(destinations);
     offersModel.setOffers(offers);
     isInitialData = true;
   })
-  .then(() => api.getPoints())
+  .then(() => apiWithProvider.getPoints())
   .then((events) => {
-    eventsModel.setEvents(UpdateType.INIT, events.map(EventsModel.adaptToClient));
+    eventsModel.setEvents(UpdateType.INIT, events);
     renderControls();
-  })
-  .catch(() => {
-    if (isInitialData) {
-      eventsModel.setEvents(UpdateType.INIT, []);
-      renderControls(!isInitialData);
-    } else {
-      eventsModel.setEvents(UpdateType.INIT, []);
-      renderControls(!isInitialData);
-      toast('Error loading data');
-    }
   });
+  // .catch(() => {
+  //   if (isInitialData) {
+  //     eventsModel.setEvents(UpdateType.INIT, []);
+  //     renderControls(!isInitialData);
+  //   } else {
+  //     eventsModel.setEvents(UpdateType.INIT, []);
+  //     renderControls(!isInitialData);
+  //     toast('Error loading data');
+  //   }
+  // });
 
 tripInfoPresenter.init();
 tripPresenter.init();
@@ -111,4 +130,13 @@ filtersPresenter.init();
 
 window.addEventListener('load', () => {
   navigator.serviceWorker.register('/sw.js');
+});
+
+window.addEventListener('online', () => {
+  document.title = document.title.replace(' [offline]', '');
+  apiWithProvider.sync();
+});
+
+window.addEventListener('offline', () => {
+  document.title += ' [offline]';
 });

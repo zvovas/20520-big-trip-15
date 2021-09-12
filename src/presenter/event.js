@@ -1,8 +1,10 @@
 import EventView from '../view/event.js';
 import EditFormView from '../view/edit-form.js';
 import {remove, render, replace} from '../utils/render.js';
-import {RenderPosition, UpdateType, UserAction} from '../const.js';
 import {isDatesEqual, calculateDuration} from '../utils/events.js';
+import {toast} from '../utils/toast.js';
+import {isOnline} from '../utils/common.js';
+import {RenderPosition, UpdateType, UserAction} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -129,6 +131,11 @@ export default class Event {
   }
 
   _handleEditClick() {
+    if (!isOnline()) {
+      toast('You can\'t edit event offline');
+      return;
+    }
+
     this._replaceEventToForm();
   }
 
@@ -137,6 +144,11 @@ export default class Event {
   }
 
   _handleSubmitForm(event) {
+    if (!isOnline()) {
+      toast('You can\'t save event offline');
+      return;
+    }
+
     const isDateStartEqual = isDatesEqual(this._event.timeStart, event.timeStart);
     const isDurationEqual = calculateDuration(this._event) === calculateDuration(event);
     const isPriceEqual = this._event.price === event.price;
@@ -150,6 +162,11 @@ export default class Event {
   }
 
   _handleDeleteClick(event) {
+    if (!isOnline()) {
+      toast('You can\'t delete event offline');
+      return;
+    }
+
     this._changeData(UserAction.DELETE_EVENT, UpdateType.MAJOR, event);
   }
 

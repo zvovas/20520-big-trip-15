@@ -82,8 +82,8 @@ export default class Events extends AbstractObserver {
       event,
       {
         'base_price': event.price,
-        'date_from': event.timeStart.toISOString(),
-        'date_to': event.timeEnd.toISOString(),
+        'date_from': event.timeStart instanceof Date ? event.timeStart.toISOString() : event.timeStart,
+        'date_to': event.timeEnd instanceof Date ? event.timeEnd.toISOString() : event.timeEnd,
         'is_favorite': event.isFavorite,
       },
     );
