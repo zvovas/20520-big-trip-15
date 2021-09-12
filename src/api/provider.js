@@ -94,9 +94,6 @@ export default class Provider {
         .then((response) => {
           const createdEvents = getSyncedEvents(response.created);
           const updatedEvents = getSyncedEvents(response.updated);
-          console.log(response);
-          console.log(createdEvents);
-          console.log(updatedEvents);
           const items = createStoreStructure([...createdEvents, ...updatedEvents]);
 
           this._eventsStore.setItems(items);

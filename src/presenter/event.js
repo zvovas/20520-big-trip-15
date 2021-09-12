@@ -133,6 +133,7 @@ export default class Event {
   _handleEditClick() {
     if (!isOnline()) {
       toast('You can\'t edit event offline');
+      this._eventComponent.shake();
       return;
     }
 
@@ -146,6 +147,7 @@ export default class Event {
   _handleSubmitForm(event) {
     if (!isOnline()) {
       toast('You can\'t save event offline');
+      this._editFormComponent.shake();
       return;
     }
 
@@ -164,6 +166,7 @@ export default class Event {
   _handleDeleteClick(event) {
     if (!isOnline()) {
       toast('You can\'t delete event offline');
+      this._editFormComponent.shake();
       return;
     }
 

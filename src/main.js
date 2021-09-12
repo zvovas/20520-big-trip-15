@@ -112,17 +112,17 @@ apiWithProvider.getInitialData()
   .then((events) => {
     eventsModel.setEvents(UpdateType.INIT, events);
     renderControls();
+  })
+  .catch(() => {
+    if (isInitialData) {
+      eventsModel.setEvents(UpdateType.INIT, []);
+      renderControls(!isInitialData);
+    } else {
+      eventsModel.setEvents(UpdateType.INIT, []);
+      renderControls(!isInitialData);
+      toast('Error loading data');
+    }
   });
-  // .catch(() => {
-  //   if (isInitialData) {
-  //     eventsModel.setEvents(UpdateType.INIT, []);
-  //     renderControls(!isInitialData);
-  //   } else {
-  //     eventsModel.setEvents(UpdateType.INIT, []);
-  //     renderControls(!isInitialData);
-  //     toast('Error loading data');
-  //   }
-  // });
 
 tripInfoPresenter.init();
 tripPresenter.init();
