@@ -34,10 +34,6 @@ export default class Filters {
     remove(prevFilterComponent);
   }
 
-  _handleModelEvent() {
-    this.init();
-  }
-
   _getFilters() {
     const tasks = this._eventsModel.getEvents();
 
@@ -58,6 +54,10 @@ export default class Filters {
         count: filter[FilterType.PAST](tasks).length,
       },
     ];
+  }
+
+  _handleModelEvent() {
+    this.init();
   }
 
   _handleChangeFilterType(type) {

@@ -78,8 +78,7 @@ export default class EventNew {
   }
 
   _handleSubmitForm(event) {
-    this._changeData(UserAction.ADD_EVENT, UpdateType.MAJOR, Object.assign({isFavorite: false}, event));
-    this.destroy();
+    this._changeData(UserAction.ADD_EVENT, UpdateType.MAJOR, Object.assign({}, event, {isFavorite: false}));
   }
 
   _handleDeleteClick() {
