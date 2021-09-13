@@ -1,5 +1,5 @@
 import AbstractView from './abstract.js';
-import {humanizeDateDayMonth, humanizeDateMonthDay} from '../utils/events.js';
+import {compareTimeStart, humanizeDateDayMonth, humanizeDateMonthDay} from '../utils/events.js';
 
 const MAX_CITIES_IN_ROUTE = 3;
 
@@ -11,6 +11,11 @@ const createRouteTemplate = (destinations) => (destinations.length <= MAX_CITIES
 const createDatesTemplate =  (events) => {
   const dateStart = events[0].timeStart;
   const dateEnd = events[events.length - 1].timeEnd;
+
+  if (humanizeDateMonthDay(dateStart) === humanizeDateMonthDay(dateEnd)) {
+    return humanizeDateMonthDay(dateStart);
+  }
+
   return (dateStart.getMonth() === dateEnd.getMonth())
     ? `${humanizeDateMonthDay(dateStart)}&nbsp;&mdash;&nbsp;${dateEnd.getDate()}`
     : `${humanizeDateDayMonth(dateStart)}&nbsp;&mdash;&nbsp;${humanizeDateDayMonth(dateEnd)}`;
@@ -32,6 +37,6 @@ export default class RouteAndDates extends AbstractView {
   }
 
   getTemplate() {
-    return createRouteAndDatesTemplate(this._events);
+    return createRouteAndDatesTemplate(this._events.sort(compareTimeStart));
   }
 }

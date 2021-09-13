@@ -41,12 +41,12 @@ export default class EventSort extends AbstractView {
     return createEventSortTemplate();
   }
 
-  _changeSortTypeHandler(evt) {
-    this._callback.changeSortType(evt.target.dataset.sortType);
-  }
-
   setChangeSortTypeHandler(callback) {
     this._callback.changeSortType = callback;
     this.getElement().addEventListener('change', this._changeSortTypeHandler);
+  }
+
+  _changeSortTypeHandler(evt) {
+    this._callback.changeSortType(evt.target.dataset.sortType);
   }
 }

@@ -76,6 +76,66 @@ export default class Board {
     }
   }
 
+  _renderLoading() {
+    render(this._boardMainContainer, this._loadingComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderEventSort() {
+    render(this._boardMainContainer, this._eventSortComponent, RenderPosition.AFTERBEGIN);
+    this._eventSortComponent.setChangeSortTypeHandler(this._handleChangeSortType);
+  }
+
+  _renderEvents() {
+    this._getEvents().forEach((event) => this._renderEvent(event));
+  }
+
+  _renderEvent(event) {
+    const eventPresenter = new EventPresenter(this._eventListComponent, this._destinationsModel, this._offersModel, this._handleViewAction, this._handleModeChange);
+    eventPresenter.init(event);
+    this._eventPresenter.set(event.id, eventPresenter);
+  }
+
+  _renderNoEvent() {
+    this._noEventComponent = new NoEventView(this._filterType);
+    render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
+    render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
+
+    if (this._getEvents().length === 0) {
+      this._renderNoEvent();
+      return;
+    }
+
+    this._renderEvents();
+  }
+
+  _clearBoard({resetSortType = false} = {}) {
+    this._eventNewPresenter.destroy();
+    this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
+    this._eventPresenter.clear();
+
+    remove(this._loadingComponent);
+
+    if(this._noEventComponent) {
+      remove(this._noEventComponent);
+    }
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DAY;
+      const prevSortComponent = this._eventSortComponent;
+      this._eventSortComponent = new EventSortView();
+      replace(this._eventSortComponent, prevSortComponent);
+      remove(prevSortComponent);
+    }
+  }
+
   _handleViewAction(actionType, updateType, update, {isDateStartEqual = true, isDurationEqual = true, isPriceEqual = true} = {}) {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
@@ -138,15 +198,6 @@ export default class Board {
     }
   }
 
-  _renderLoading() {
-    render(this._boardMainContainer, this._loadingComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderEventSort() {
-    render(this._boardMainContainer, this._eventSortComponent, RenderPosition.AFTERBEGIN);
-    this._eventSortComponent.setChangeSortTypeHandler(this._handleChangeSortType);
-  }
-
   _handleChangeSortType(sortType) {
     if (this._currentSortType === sortType) {
       return;
@@ -157,59 +208,8 @@ export default class Board {
     this._renderBoard();
   }
 
-  _renderEvents() {
-    this._getEvents().forEach((event) => this._renderEvent(event));
-  }
-
-  _renderEvent(event) {
-    const eventPresenter = new EventPresenter(this._eventListComponent, this._destinationsModel, this._offersModel, this._handleViewAction, this._handleModeChange);
-    eventPresenter.init(event);
-    this._eventPresenter.set(event.id, eventPresenter);
-  }
-
   _handleModeChange() {
     this._eventNewPresenter.destroy();
     this._eventPresenter.forEach((eventPresenter) => eventPresenter.resetView());
-  }
-
-  _renderNoEvent() {
-    this._noEventComponent = new NoEventView(this._filterType);
-    render(this._boardMainContainer, this._noEventComponent, RenderPosition.BEFOREEND);
-  }
-
-  _clearBoard({resetSortType = false} = {}) {
-    this._eventNewPresenter.destroy();
-    this._eventPresenter.forEach((eventPresenter) => eventPresenter.destroy());
-    this._eventPresenter.clear();
-
-    remove(this._loadingComponent);
-
-    if(this._noEventComponent) {
-      remove(this._noEventComponent);
-    }
-
-    if (resetSortType) {
-      this._currentSortType = SortType.DAY;
-      const prevSortComponent = this._eventSortComponent;
-      this._eventSortComponent = new EventSortView();
-      replace(this._eventSortComponent, prevSortComponent);
-      remove(prevSortComponent);
-    }
-  }
-
-  _renderBoard() {
-    if (this._isLoading) {
-      this._renderLoading();
-      return;
-    }
-
-    render(this._boardMainContainer, this._eventListComponent, RenderPosition.BEFOREEND);
-
-    if (this._getEvents().length === 0) {
-      this._renderNoEvent();
-      return;
-    }
-
-    this._renderEvents();
   }
 }

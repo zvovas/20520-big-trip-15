@@ -122,14 +122,6 @@ export default class Event {
     this._mode = Mode.DEFAULT;
   }
 
-  _escKeydownHandler(evt) {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this._editFormComponent.reset(this._event);
-      this._replaceFormToEvent();
-    }
-  }
-
   _handleEditClick() {
     if (!isOnline()) {
       toast('You can\'t edit event offline');
@@ -185,5 +177,13 @@ export default class Event {
         },
       ),
     );
+  }
+
+  _escKeydownHandler(evt) {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this._editFormComponent.reset(this._event);
+      this._replaceFormToEvent();
+    }
   }
 }

@@ -4,15 +4,17 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {countEventsByType, sumCostEventByType, sumDurationEventsByType} from '../utils/statistics.js';
 import {calculateTimeSpend, humanizeTimeSpend} from '../utils/events.js';
 
+const compareValue = (itemA, itemB) => itemB.value - itemA.value;
+
 const renderMoneyChart = (moneyCtx, events, types) => {
-  const moneysByType = types.map((type) => sumCostEventByType(events, type));
+  const sortedMoneys = types.map((type) => Object.assign({}, {label: type, value: sumCostEventByType(events, type)})).sort(compareValue);
   return new Chart(moneyCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: types,
+      labels: sortedMoneys.map((item) => item.label),
       datasets: [{
-        data: moneysByType,
+        data: sortedMoneys.map((item) => item.value),
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
@@ -73,14 +75,14 @@ const renderMoneyChart = (moneyCtx, events, types) => {
 };
 
 const renderTypeChart = (typeCtx, events, types) => {
-  const countsByType = types.map((type) => countEventsByType(events, type));
+  const sortedCountsByType = types.map((type) => Object.assign({}, {label: type, value: countEventsByType(events, type)})).sort(compareValue);
   return new Chart(typeCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: types,
+      labels: sortedCountsByType.map((item) => item.label),
       datasets: [{
-        data: countsByType,
+        data: sortedCountsByType.map((item) => item.value),
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
@@ -141,15 +143,14 @@ const renderTypeChart = (typeCtx, events, types) => {
 };
 
 const renderTimeSpendChart = (typeCtx, events, types) => {
-  const durationsByType = types.map((type) => sumDurationEventsByType(events, type));
-
+  const sortedDurationsByType = types.map((type) => Object.assign({}, {label: type, value: sumDurationEventsByType(events, type)})).sort(compareValue);
   return new Chart(typeCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: types,
+      labels: sortedDurationsByType.map((item) => item.label),
       datasets: [{
-        data: durationsByType,
+        data: sortedDurationsByType.map((item) => item.value),
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
