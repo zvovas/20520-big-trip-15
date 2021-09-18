@@ -153,6 +153,7 @@ export default class Event {
     const isMinorUpdate = !isPriceEqual || !isOffersPriceEqual || !isDestinationEqual || !isDateEndEqual;
 
     this._changeData(UserAction.UPDATE_EVENT, isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH, event, {isDateStartEqual, isDurationEqual, isPriceEqual});
+    this._replaceFormToEvent();
   }
 
   _handleDeleteClick(event) {
